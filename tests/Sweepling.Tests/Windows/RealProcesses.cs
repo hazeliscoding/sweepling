@@ -13,13 +13,14 @@ internal static class RealProcesses
     public static string Marker() => "sweepling-test-" + Guid.NewGuid().ToString("N")[..8];
 
     // Output is redirected, because a child holding the test runner's output pipe hangs `dotnet test`.
-    public static Process StartSleeper(string marker) =>
+    public static Process StartSleeper(string marker, string? workingDirectory = null) =>
         Process.Start(new ProcessStartInfo("powershell.exe", $"-NoProfile -NonInteractive -Command \"Start-Sleep -Seconds 30 # {marker}\"")
         {
             UseShellExecute = false,
             CreateNoWindow = true,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
+            WorkingDirectory = workingDirectory ?? "",
         })!;
 
     public static string Encode(string script) => Convert.ToBase64String(Encoding.Unicode.GetBytes(script));

@@ -6,7 +6,6 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Security;
 using Windows.Win32.System.Diagnostics.ToolHelp;
-using Windows.Win32.System.SystemInformation;
 using Windows.Win32.System.Threading;
 using Ntdll = Windows.Wdk.PInvoke;
 using PROCESSINFOCLASS = Windows.Wdk.System.Threading.PROCESSINFOCLASS;
@@ -21,11 +20,6 @@ namespace Sweepling.Windows;
 /// </summary>
 public sealed unsafe class ProcessReader(string? agentPidVariable)
 {
-    // x64 layout: PEB.ProcessParameters, then RTL_USER_PROCESS_PARAMETERS.Environment and EnvironmentSize.
-    private const int ProcessParametersOffset = 0x20;
-    private const int EnvironmentOffset = 0x80;
-    private const int EnvironmentSizeOffset = 0x3F0;
-    private const int MaxEnvironmentBytes = 1 << 20;
     private const int MaxCommandLineBytes = 1 << 20;
 
     private readonly uint _own = (uint)Environment.ProcessId;
@@ -107,7 +101,7 @@ public sealed unsafe class ProcessReader(string? agentPidVariable)
             var key = (p.Pid, p.Started);
             if (!_agentPids.TryGetValue(key, out var agentPid))
             {
-                agentPid = AgentPid((uint)p.Pid, p.Started, agentPidVariable);
+                agentPid = Peb.Variable(p.Pid, p.Started, agentPidVariable);
             }
 
             looked[key] = agentPid;
@@ -224,88 +218,6 @@ public sealed unsafe class ProcessReader(string? agentPidVariable)
         {
             ArrayPool<byte>.Shared.Return(buffer);
         }
-    }
-
-    /// <summary>The agent's PID from the process's environment, read from its PEB.</summary>
-    private static int? AgentPid(uint pid, DateTimeOffset started, string variable)
-    {
-        var process = PInvoke.OpenProcess(PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_ACCESS_RIGHTS.PROCESS_VM_READ, false, pid);
-        if (process.IsNull)
-        {
-            return null;
-        }
-
-        try
-        {
-            // The PID may have been reused since the snapshot, and a 32-bit process has a different PEB layout.
-            FILETIME created, exited, kernel, user;
-            IMAGE_FILE_MACHINE machine;
-            PROCESS_BASIC_INFORMATION basic;
-            uint length = 0;
-            if (!PInvoke.GetProcessTimes(process, &created, &exited, &kernel, &user) || Started(created) != started
-                || !OperatingSystem.IsWindowsVersionAtLeast(10, 0, 10586)
-                || !PInvoke.IsWow64Process2(process, &machine, null) || machine != IMAGE_FILE_MACHINE.IMAGE_FILE_MACHINE_UNKNOWN
-                || Ntdll.NtQueryInformationProcess(process, PROCESSINFOCLASS.ProcessBasicInformation, &basic, (uint)sizeof(PROCESS_BASIC_INFORMATION), &length).Value < 0
-                || !TryRead(process, (byte*)basic.PebBaseAddress + ProcessParametersOffset, out var parameters)
-                || !TryRead(process, (byte*)parameters + EnvironmentOffset, out var environment)
-                || !TryRead(process, (byte*)parameters + EnvironmentSizeOffset, out var size)
-                || environment == 0 || size <= 0 || size > MaxEnvironmentBytes)
-            {
-                return null;
-            }
-
-            // The size comes from the other process's memory: read whole characters, never more than the buffer holds.
-            var chars = (int)size / sizeof(char);
-            var block = ArrayPool<char>.Shared.Rent(chars);
-            try
-            {
-                chars = Math.Min(chars, block.Length);
-                fixed (char* p = block)
-                {
-                    if (!PInvoke.ReadProcessMemory(process, (void*)environment, p, (nuint)(chars * sizeof(char)), null))
-                    {
-                        return null;
-                    }
-                }
-
-                return Find(block.AsSpan(0, chars), variable);
-            }
-            finally
-            {
-                ArrayPool<char>.Shared.Return(block);
-            }
-        }
-        finally
-        {
-            PInvoke.CloseHandle(process);
-        }
-    }
-
-    // The block is "NAME=value\0NAME=value\0\0".
-    private static int? Find(ReadOnlySpan<char> block, string variable)
-    {
-        while (!block.IsEmpty && block[0] != '\0')
-        {
-            var end = block.IndexOf('\0');
-            var entry = end < 0 ? block : block[..end];
-            if (entry.Length > variable.Length && entry[variable.Length] == '='
-                && entry[..variable.Length].Equals(variable, StringComparison.OrdinalIgnoreCase))
-            {
-                return int.TryParse(entry[(variable.Length + 1)..], out var pid) ? pid : null;
-            }
-
-            block = end < 0 ? [] : block[(end + 1)..];
-        }
-
-        return null;
-    }
-
-    private static bool TryRead(HANDLE process, void* address, out nint value)
-    {
-        nint read;
-        var ok = PInvoke.ReadProcessMemory(process, address, &read, (nuint)sizeof(nint), null);
-        value = ok ? read : 0;
-        return ok;
     }
 
     internal static DateTimeOffset Started(FILETIME created) =>

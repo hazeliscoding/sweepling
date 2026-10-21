@@ -7,6 +7,7 @@ GetCurrentProcess
 GetExitCodeProcess
 GetExtendedTcpTable
 GetLengthSid
+GetProcessMemoryInfo
 GetProcessTimes
 GetTokenInformation
 IsWow64Process2
@@ -19,6 +20,7 @@ OpenProcessToken
 Process32FirstW
 Process32NextW
 PROCESS_BASIC_INFORMATION
+PROCESS_MEMORY_COUNTERS_EX
 ProcessIdToSessionId
 QueryFullProcessImageName
 ReadProcessMemory
