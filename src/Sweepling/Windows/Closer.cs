@@ -6,24 +6,6 @@ using Windows.Win32.System.Threading;
 
 namespace Sweepling.Windows;
 
-public enum CloseOutcome
-{
-    Closed,
-
-    /// <summary>It had already ended.</summary>
-    Gone,
-
-    /// <summary>Its PID now belongs to another process, so it was left alone.</summary>
-    Reused,
-
-    /// <summary>Something in its group gained a connection since it was offered, so the group was left alone.</summary>
-    InUse,
-
-    Failed,
-}
-
-public sealed record CloseResult(Proc Process, CloseOutcome Outcome);
-
 /// <summary>
 /// Closes a group the person confirmed. Right before closing, it checks that nothing in the group has
 /// gained a connection, and that each PID still belongs to the process that was offered.
