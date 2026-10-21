@@ -13,6 +13,8 @@ These are the working rules for agents in this repo. Sweepling (Apache-2.0) is a
 Each rule has its reason, so it can be applied to cases it didn't foresee. When one becomes code, give it a test that fails when the rule is broken.
 
 - **Never close without confirmation.** A wrong close ends someone's work, and that costs more than any leftover. No auto-close mode, setting or flag, and `--scan` only reports.
+- **Never tick a stray of a running session by default.** Its session may still need it. Only leftovers start ticked, and a refresh keeps what the person ticked.
+- **Close only what your test started.** On the owner's machine the review window lists the owner's real leftovers, ticked. Untick every group but your test's own by name, then press Close only after re-reading that exactly your group is ticked and the button says "Close 1 group". The owner decides what happens to their leftovers.
 - **Re-check PID and start time right before closing.** Windows reuses process IDs, so the PID you saw seconds ago can belong to a new process. If either has changed, don't close it and drop it from the group.
 - **Unknown means running.** When Sweepling can't tell whether a session has ended, it treats the session as running. A wrong "running" only delays an offer; a wrong "ended" offers a live session's processes.
 - **Protected processes are never in a group.** Orca's daemon-host detaches by design and hosts the live `claude.exe` sessions, so a group that reached it would end every session. The protect list wins over every other rule, including a user's additions.
@@ -23,7 +25,7 @@ Each rule has its reason, so it can be applied to cases it didn't foresee. When 
 - **Never pick targets by CPU or memory use.** A busy process is often a build someone is waiting for; cc-reaper's history shows that rule killing background builds.
 - **Only the current user's processes in the current Windows session, and never admin rights.** Sweepling must not reach other people's work, and it must run with nothing more than a normal sign-in.
 - **NativeAOT-compatible dependencies only.** Low idle cost depends on a single NativeAOT process. Use source-generated System.Text.Json and compiled bindings; a reflection-based library breaks the publish or fails at run time after trimming. Trim and AOT warnings are errors.
-- **Stay under the idle ceiling.** Tray-only idle memory must stay within twice Prompuff's, measured the same way, and must come back under it after the review window closes. Sweepling must cost less than the leftovers it finds. A change that grows idle memory records the new number in `ROADMAP.md`.
+- **Stay under the idle ceiling.** Tray-only idle memory must stay within twice Prompuff's, measured the same way, and must come back under it after the review window closes. Sweepling must cost less than the leftovers it finds. A change that grows idle memory records the new number in `ROADMAP.md`. Keep software rendering: Avalonia's GPU renderer held about 60 MB from launch, window or not.
 - **Leave nothing behind.** Sweepling's own processes end when it quits, including across an update restart.
 - **No telemetry. The update check is the only network call.** Sweepling sees every command line on the machine, so nothing about them leaves it.
 - **Mask command lines in logs.** Command lines carry tokens, keys and private paths. Shorten them and mask token-like strings before anything is written, and never put a real token in a fixture or test: build token-shaped values at run time.
@@ -60,7 +62,11 @@ One meaning per term. Code, docs, UI copy and agents use these words and no syno
 - Idle memory is measured on the NativeAOT build with no window open, next to Prompuff closed to the tray, both read at the same moment: working set, private bytes, and private working set (Task Manager's Memory column), from `Get-Process` and `Win32_PerfFormattedData_PerfProc_Process`. Run Prompuff on a scratch `PROMPUFF_DATA_DIR` whose `settings.json` turns `keepRunningInTray` on, so the owner's library and settings are never touched.
 - `artifacts\publish\Sweepling.exe --scan > scan.json` prints the groups Sweepling would offer right now, as JSON with command lines masked, ignoring the grace period, and closes nothing. Redirect or pipe it: a WinExe doesn't make the shell wait.
 - The real-process tests in `tests/Sweepling.Tests/Windows` start their own processes and stop only those, checked by PID and start time. Their children redirect output and time out on their own, because a child holding the test runner's output pipe hangs `dotnet test`.
-- To check the tray by hand, use UI Automation: a new icon sits in the hidden-icons overflow (window class `TopLevelWindowForOverflowXamlIsland`), as a button named "Sweepling". Its menu opens as a `TrayPopupRoot` window in Sweepling's process. Find each element by name right before clicking it, and restore the cursor afterwards.
+- `powershell -NoProfile -File scripts/tray.ps1 open <screenshot.png> | done | quit` drives the running app's tray and window through UI Automation for hand tests: open the review window from the icon, press Done, or choose Quit in the tray menu. It finds each element by name right before acting and restores the cursor.
+  - A new icon sits in the hidden-icons overflow (window class `TopLevelWindowForOverflowXamlIsland`), as a button named after its tooltip.
+  - UI Automation lists no items in the Win32 tray menu, so `quit` posts keys to the menu's own window rather than to the screen.
+  - Windows' notifications don't show up in UI Automation, so ask the owner whether one appeared.
+- Measure idle memory with the watch running for 75 s, then with the window open, then two minutes after it closes.
 - `dotnet run scripts/make-icons.cs` rebuilds `docs/brand/sweepling.ico` from `docs/brand/tray.svg`; `scripts/make_brand.py` regenerates the SVGs (see its header).
 
 ## Working style
