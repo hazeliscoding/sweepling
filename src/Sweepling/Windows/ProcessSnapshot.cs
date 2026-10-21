@@ -177,6 +177,11 @@ public static unsafe class ProcessSnapshot
                 }
 
                 var text = (UNICODE_STRING*)p;
+                if (text->Length > needed - sizeof(UNICODE_STRING))
+                {
+                    return null;
+                }
+
                 return new string(text->Buffer.Value, 0, text->Length / sizeof(char));
             }
         }
@@ -214,18 +219,21 @@ public static unsafe class ProcessSnapshot
                 return null;
             }
 
-            var block = ArrayPool<char>.Shared.Rent((int)size / sizeof(char));
+            // The size comes from the other process's memory: read whole characters, never more than the buffer holds.
+            var chars = (int)size / sizeof(char);
+            var block = ArrayPool<char>.Shared.Rent(chars);
             try
             {
+                chars = Math.Min(chars, block.Length);
                 fixed (char* p = block)
                 {
-                    if (!PInvoke.ReadProcessMemory(process, (void*)environment, p, (nuint)size, null))
+                    if (!PInvoke.ReadProcessMemory(process, (void*)environment, p, (nuint)(chars * sizeof(char)), null))
                     {
                         return null;
                     }
                 }
 
-                return Find(block.AsSpan(0, (int)size / sizeof(char)), variable);
+                return Find(block.AsSpan(0, chars), variable);
             }
             finally
             {
