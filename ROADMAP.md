@@ -50,7 +50,15 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - **The rules file** is JSON with comments and `"version": 1`, read with source-generated System.Text.Json so it works under NativeAOT. An unknown version or key, or a rule with no pattern, is refused. Patterns are case-insensitive regular expressions, and `%NAME%` expands to that environment variable's path, matching either slash. The user's file is `%APPDATA%\Sweepling\rules.json`: its lists add to the shipped ones and its settings win. This gives up removing a shipped rule.
 - **`--scan` ignores the grace period** and prints every group as JSON, with command lines masked, so it works as a one-off check. A WinExe has no console of its own, so it attaches to the one it was started from unless output is redirected.
 - **Reading another process's environment is bounded by Sweepling's own buffer.** The size comes from the other process's memory, which that process controls. Found by an automated security review of the M1 code.
-- **Left to the builder,** to settle with tests and record here: the review window layout and the notification mechanism, with NativeAOT-compatible dependencies only; close order, and whether to try a gentle close first. The snapshot interval, grace period, rules file format, family tree persistence and untraced sessions were settled in M1, above.
+- **The tray icon is Sweepling's own, through `Shell_NotifyIcon`.** Avalonia's tray icon can't raise a Windows notification. A balloon from `Shell_NotifyIcon` shows as a Windows notification, needs no AppUserModelID or WinRT, and respects quiet time. The count is one of 11 prebuilt icons, asleep at zero and badged from 1 to 9 and 9+. This gives up Avalonia's themed tray menu: the native menu stays light in dark mode.
+- **A notification comes only when the leftover count rises.** It names the first leftover and counts the rest, and clicking it opens the review window.
+- **Closing is `TerminateProcess`, parents first, with no gentle close.** Dev servers and watchers have no window to ask, and a supervisor like nodemon restarts a child closed before it. Right before closing comes a fresh TCP check of the whole group, then each process's start time, and whether it still runs. This gives up the cleanup a dev server runs on Ctrl+C.
+- **The review window is the confirmation.** It opens beside the tray, one at a time, and is released when it closes. Leftovers start ticked, Session still running never does, and ticks survive the 5 s refresh. Close acts on what is ticked, and Done or Escape closes the window. This gives up a separate "are you sure" dialog, which would repeat what the window already shows.
+- **Sweepling renders in software.** Avalonia started its GPU renderer at launch, window or not. In software, tray-only idle fell from 73.9 to 13.7 MB private bytes and from 16 to 6 threads. This gives up GPU drawing, which a list of a few dozen rows doesn't need.
+- **One Sweepling runs at a time.** A second launch, such as the login start next to a manual one, opens the first one's review window and exits.
+- **Sweepling builds for x64 only.** Its PEB offsets assume x64, and CsWin32 lays out `NOTIFYICONDATAW` per architecture. This gives up a native Arm64 build; Arm64 Windows runs x64 apps under emulation.
+- **Git Bash programs report their real folder.** *This corrects the commit "read a shown process's folder and memory", which called the `C:\git` they reported a placeholder: it was the folder their Claude Code session worked in.* The environment finding above still holds.
+- **Left to the builder:** nothing now. The review window, notifications, close order and gentle close were settled in M2, above, and the rest in M1.
 
 ## M0: Placeholder
 
@@ -98,13 +106,33 @@ Given up for them: features that need administrator rights, cross-platform suppo
 
 ## M2: Review and close
 
-- [ ] A snapshot every 5 s that stays cheap: cache each process's image, command line and windowed flag by PID and start time, and read only new processes. A full snapshot took 160–300 ms with 647 processes.
-- [ ] Tray count and a notification when it rises.
-- [ ] Review window with the Leftovers and Session still running sections.
-- [ ] Closing a group, with the PID and start-time re-check right before each close.
-- [ ] The local closed log, with command lines masked.
+- [x] A snapshot every 5 s that stays cheap: cache each process's image, command line and windowed flag by PID and start time, and read only new processes. A full snapshot took 160–300 ms with 647 processes.
+- [x] Tray count and a notification when it rises.
+- [x] Review window with the Leftovers and Session still running sections.
+- [x] Closing a group, with the PID and start-time re-check right before each close.
+- [x] The local closed log, with command lines masked.
 
 **Done when:** an integration test closes a fake orphaned dev server and its port frees, a PID-reuse test refuses to close, and a week of the owner's dogfooding log exists.
+
+**So far, on 2026-10-21.** M2 stays open until the dogfooding log in `docs/dogfooding.md` covers a week, through 2026-10-28.
+
+- The integration test closes a fake orphaned dev server and its port frees, and the PID-reuse test refuses to close. Two more cover a group that gained a connection after it was listed, and a process that already ended. Removing the start-time check or the connection check fails its test.
+- The snapshot cache brought a snapshot of about 695 processes to 32–43 ms after the first one's 150 ms. The watch costs about 0.6% of one core.
+- The published build was driven through the real tray and window with UI Automation, on the owner's machine.
+  - Left-clicking the icon opened the window, with 12 leftovers ticked and 11 groups under Session still running unticked.
+  - Every real leftover was unticked by name. With only a fake orphaned "Vite dev server" ticked and the button reading "Close 1 group", Close ended it and freed its port. The status read "Closed 1 group.", the log got its line, and the owner's own `next dev` kept running.
+  - A second fake raised the count from 11 to 12 after the grace period, and the owner saw the notification.
+  - Quit in the tray menu ended Sweepling with the window open, left no child process, and removed the icon.
+- Idle memory, with the watch running and software rendering, next to the same Prompuff 1.1.1 reading as in M0:
+
+  | | Working set | Private bytes | Private working set |
+  |---|---|---|---|
+  | Prompuff 1.1.1, in the tray | 149.3 MB | 131.1 MB | 46.3 MB |
+  | Sweepling, tray only, 75 s | 31.1 MB | 13.7 MB | 10.8 MB |
+  | Sweepling, window open | 55.9 MB | 25.3 MB | 22.6 MB |
+  | Sweepling, 120 s after the window closed | 54.6 MB | 23.1 MB | 20.5 MB |
+
+  Within the ceiling, twice Prompuff's, on every counter, and back under it after the window closes. About 10 MB of Skia's native caches stay after the first window.
 
 ## M3: Release
 
@@ -131,6 +159,8 @@ A dogfooding log in `docs/dogfooding.md`, kept from M2 on: leftovers found, grou
 - Codex, once a Codex leftover shows up in the dogfooding log.
 - Tie Git Bash strays to their session through the session ID in Claude Code's temp paths, matched against the `CLAUDE_CODE_SESSION_ID` of a live session's native children, so ended-session watchers move to Leftovers.
 - Headless browsers left by Playwright or Puppeteer, which the windowed-app rule keeps out today.
+- A dark tray menu. Win32 menus stay light in dark mode without undocumented `uxtheme` calls.
+- Find out why the tray icon's accessible name repeats the tooltip it started with ("Sweepling: nothing to sweep Sweepling: 12 leftovers").
 - Cursor and other agents.
 - The Claude desktop app.
 - A winget package.
