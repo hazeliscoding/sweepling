@@ -1,3 +1,4 @@
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -27,6 +28,13 @@ public sealed record CloseResult(Proc Process, CloseOutcome Outcome);
 /// </summary>
 public sealed class ClosedLog(string path, string? userProfile)
 {
+    // A local file people read, never HTML: quotes and slashes stay as they are.
+    private static readonly ClosedLogJson Json = new(new JsonSerializerOptions
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    });
+
     public static string DefaultPath { get; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sweepling", "closed.log");
 
@@ -38,7 +46,7 @@ public sealed class ClosedLog(string path, string? userProfile)
         var lines = results.Select(r => JsonSerializer.Serialize(
             new ClosedLine(when, what, maskedFolder, section, r.Process.Pid, r.Process.Name, r.Process.Started,
                 JsonNamingPolicy.CamelCase.ConvertName(r.Outcome.ToString()), CommandLineMask.Apply(r.Process.CommandLine, userProfile)),
-            ClosedLogJson.Default.ClosedLine));
+            Json.ClosedLine));
         File.AppendAllLines(path, lines);
     }
 }
@@ -54,6 +62,5 @@ internal sealed record ClosedLine(
     string Outcome,
     string CommandLine);
 
-[JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(ClosedLine))]
 internal sealed partial class ClosedLogJson : JsonSerializerContext;

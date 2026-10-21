@@ -36,6 +36,17 @@ public sealed class ClosedLogTests : IDisposable
     }
 
     [Fact]
+    public void The_log_reads_as_plain_text()
+    {
+        var node = P(300, 200, 0, Node, "\"C:\\nodejs\\node.exe\" -e require('net') vite");
+        var group = new Group(SessionState.Ended, Tie.Environment, [node], [node], []);
+
+        new ClosedLog(LogPath, Profile).Write(T0, group, "Vite dev server", null, [new(node, CloseOutcome.Closed)]);
+
+        Assert.Contains(@"\""C:\\nodejs\\node.exe\"" -e require('net') vite", File.ReadAllText(LogPath));
+    }
+
+    [Fact]
     public void Later_closes_are_added_to_the_log()
     {
         var node = P(300, 200, 0, Node, "node next dev");
