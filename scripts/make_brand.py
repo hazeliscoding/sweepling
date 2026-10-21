@@ -38,9 +38,14 @@ def n(v: float) -> str:
     return "0" if t in ("-0", "") else t
 
 
-def pebble(handle: str, transform: str = "") -> str:
-    """Option 1A, drawn in a 64-unit box."""
+def pebble(handle: str, transform: str = "", asleep: bool = False) -> str:
+    """Option 1A, drawn in a 64-unit box. Asleep, its eyes are closed: nothing to sweep."""
     attr = f' transform="{transform}"' if transform else ""
+    eyes = (
+        f'<path d="M19.4 35.6Q22 38.2 24.6 35.6M29.4 35.6Q32 38.2 34.6 35.6" fill="none" stroke="{INK}" stroke-width="2" stroke-linecap="round"/>'
+        if asleep
+        else f'<circle cx="22" cy="36" r="2.4" fill="{INK}"/><circle cx="32" cy="36" r="2.4" fill="{INK}"/>'
+    )
     return (
         f"<g{attr}>"
         f'<g transform="translate({BROOM_AT[0]} {BROOM_AT[1]}) rotate({BROOM_TURN})">'
@@ -49,9 +54,8 @@ def pebble(handle: str, transform: str = "") -> str:
         f'<line x1="-5.5" y1="8.5" x2="5.5" y2="8.5" stroke="{INK}" stroke-width="2"/>'
         "</g>"
         f'<circle cx="27" cy="38" r="19" fill="{MINT}" stroke="{INK}" stroke-width="3"/>'
-        f'<circle cx="22" cy="36" r="2.4" fill="{INK}"/>'
-        f'<circle cx="32" cy="36" r="2.4" fill="{INK}"/>'
-        f'<path d="M25 40.5Q27 42.5 29 40.5" fill="none" stroke="{INK}" stroke-width="1.8" stroke-linecap="round"/>'
+        + eyes
+        + f'<path d="M25 40.5Q27 42.5 29 40.5" fill="none" stroke="{INK}" stroke-width="1.8" stroke-linecap="round"/>'
         f'<ellipse cx="17.5" cy="42" rx="2.6" ry="1.6" fill="{BLUSH}"/>'
         f'<ellipse cx="36.5" cy="42" rx="2.6" ry="1.6" fill="{BLUSH}"/>'
         f'<circle cx="48.5" cy="39" r="3.6" fill="{MINT}" stroke="{INK}" stroke-width="2.5"/>'
@@ -163,4 +167,47 @@ for name, handle, color in (("lockup.svg", INK, WORD), ("lockup-dark.svg", HANDL
     )
     (out / name).write_text(svg(W, H, body, "Sweepling"), encoding="utf-8", newline="\n")
 
-print("wrote", sorted(p.name for p in out.glob("*.svg")))
+# --- tray states: asleep with nothing to sweep, awake with a count badge, 1 to 9 then 9+ ----------
+BADGE = "#C2410C"
+tray = out / "tray"
+tray.mkdir(exist_ok=True)
+side = max(bw, bh) + 2 * pad
+vx, vy = bx0 + bw / 2 - side / 2, by0 + bh / 2 - side / 2
+tray_vb = (vx, vy, side, side)
+r = side * 0.25
+cx, cy = vx + side - r, vy + r
+
+
+def badge(label: str) -> str:
+    """The count on a coral disc in the icon's top right, its digits outlined in Fredoka and centred."""
+    run = []
+    x = 0.0
+    for ch in label:
+        gname = font.getBestCmap()[ord(ch)]
+        run.append((gname, x))
+        x += font["hmtx"][gname][0]
+    bounds = BoundsPen(gs)
+    for gname, gx in run:
+        gs[gname].draw(TransformPen(bounds, (1, 0, 0, 1, gx, 0)))
+    gx0, gy0, gx1, gy1 = bounds.bounds
+    s = (r * 1.05) / (gy1 - gy0)
+    if (gx1 - gx0) * s > r * 1.5:
+        s = (r * 1.5) / (gx1 - gx0)
+    dx = cx - (gx0 + gx1) / 2 * s
+    dy = cy + (gy0 + gy1) / 2 * s
+    pen = SVGPathPen(gs, ntos=n)
+    for gname, gx in run:
+        gs[gname].draw(TransformPen(pen, (s, 0, 0, -s, dx + gx * s, dy)))
+    return (
+        f'<circle cx="{n(cx)}" cy="{n(cy)}" r="{n(r)}" fill="{BADGE}" stroke="#FFFFFF" stroke-width="{n(side * 0.035)}"/>'
+        f'<path d="{pen.getCommands()}" fill="#FFFFFF"/>'
+    )
+
+
+(tray / "tray-0.svg").write_text(svg(side, side, pebble(HANDLE_TRAY, asleep=True), "Sweepling", vb=tray_vb, px_scale=4), encoding="utf-8", newline="\n")
+for count in range(1, 11):
+    label = str(count) if count < 10 else "9+"
+    name = f"tray-{count}.svg" if count < 10 else "tray-many.svg"
+    (tray / name).write_text(svg(side, side, pebble(HANDLE_TRAY) + badge(label), "Sweepling", vb=tray_vb, px_scale=4), encoding="utf-8", newline="\n")
+
+print("wrote", sorted(p.name for p in out.glob("*.svg")), "and", len(list(tray.glob("*.svg"))), "tray states")
