@@ -41,14 +41,4 @@ public sealed class ProcessDetailsTests
             Stop(sleeper);
         }
     }
-
-    [Fact]
-    public void A_git_bash_program_is_an_msys_program()
-    {
-        const string bash = @"C:\Program Files\Git\usr\bin\bash.exe";
-        Assert.SkipUnless(File.Exists(bash), "Git for Windows isn't installed here.");
-
-        Assert.True(ProcessDetails.IsMsys(bash));
-        Assert.False(ProcessDetails.IsMsys(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe")));
-    }
 }

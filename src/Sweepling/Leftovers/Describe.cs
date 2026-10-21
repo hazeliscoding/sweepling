@@ -36,10 +36,7 @@ public static partial class Describe
         return Path.GetFileNameWithoutExtension(group.Strays[0].Image);
     }
 
-    /// <summary>
-    /// The group's folder: its first member's that has one, which skips Git Bash programs, else the project
-    /// a Claude Code temp path names, as Git Bash watchers carry.
-    /// </summary>
+    /// <summary>The group's folder: its first member's that can be read, else the project a Claude Code temp path names.</summary>
     public static string? Folder(Group group, Func<Proc, string?> currentDirectory, Func<string, bool> directoryExists) =>
         group.Members.Select(currentDirectory).FirstOrDefault(f => f is not null)
         ?? group.Members.Select(m => ProjectFromClaudeTemp(m.CommandLine, directoryExists)).FirstOrDefault(f => f is not null);

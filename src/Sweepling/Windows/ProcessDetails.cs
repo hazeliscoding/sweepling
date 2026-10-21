@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Runtime.InteropServices.ComTypes;
 using Sweepling.Leftovers;
 using Windows.Win32;
@@ -13,11 +12,9 @@ namespace Sweepling.Windows;
 /// </summary>
 public static unsafe class ProcessDetails
 {
-    private static readonly ConcurrentDictionary<string, bool> MsysFolders = new(StringComparer.OrdinalIgnoreCase);
-
-    /// <summary>The folder it runs in, or null for a Git Bash program, whose Windows folder is a placeholder.</summary>
+    /// <summary>The folder it runs in. Git Bash programs keep theirs in step with their own, too.</summary>
     public static string? CurrentDirectory(Proc process) =>
-        IsMsys(process.Image) || Peb.CurrentDirectory(process.Pid, process.Started) is not { } folder
+        Peb.CurrentDirectory(process.Pid, process.Started) is not { } folder
             ? null
             : folder.Length > 3 ? folder.TrimEnd('\\') : folder;
 
@@ -44,9 +41,4 @@ public static unsafe class ProcessDetails
             PInvoke.CloseHandle(handle);
         }
     }
-
-    /// <summary>Git Bash's programs are MSYS2 programs, which sit beside <c>msys-2.0.dll</c>.</summary>
-    public static bool IsMsys(string image) =>
-        Path.GetDirectoryName(image) is { } folder
-        && MsysFolders.GetOrAdd(folder, f => File.Exists(Path.Combine(f, "msys-2.0.dll")) || File.Exists(Path.Combine(f, "cygwin1.dll")));
 }
