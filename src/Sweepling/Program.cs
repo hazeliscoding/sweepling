@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Threading;
 using Sweepling.Leftovers;
 using Sweepling.Windows;
 using Windows.Win32;
@@ -7,6 +8,8 @@ namespace Sweepling;
 
 internal static class Program
 {
+    private const string InstanceName = @"Local\hazeliscoding.Sweepling";
+
     [STAThread]
     public static int Main(string[] args)
     {
@@ -14,6 +17,28 @@ internal static class Program
         {
             return Scan();
         }
+
+        // One Sweepling at a time: a second launch opens the review window of the one already running.
+        using var mutex = new Mutex(true, InstanceName, out var first);
+        using var show = new EventWaitHandle(false, EventResetMode.AutoReset, InstanceName + ".Show");
+        if (!first)
+        {
+            show.Set();
+            return 0;
+        }
+
+        var listener = new Thread(() =>
+        {
+            while (show.WaitOne())
+            {
+                Dispatcher.UIThread.Post(() => (Application.Current as App)?.ShowReview());
+            }
+        })
+        {
+            IsBackground = true,
+            Name = "Second launch",
+        };
+        listener.Start();
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         return 0;

@@ -1,0 +1,71 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Sweepling.App"
+             RequestedThemeVariant="Default">
+  <!-- The tokens in docs/brand/README.md. Every text pair passes WCAG AA. -->
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#F4F7F6" />
+          <SolidColorBrush x:Key="LineBrush" Color="#DDE5E2" />
+          <SolidColorBrush x:Key="TextBrush" Color="#17312E" />
+          <SolidColorBrush x:Key="TextMutedBrush" Color="#4A5A57" />
+          <SolidColorBrush x:Key="CloseBrush" Color="#C2410C" />
+          <SolidColorBrush x:Key="CloseHoverBrush" Color="#9A3412" />
+          <SolidColorBrush x:Key="CloseTextBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="CautionBrush" Color="#8A6100" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#0F17312E" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#1A17312E" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="#DDE5E2" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="#DDE5E2" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="#DDE5E2" />
+          <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="#DDE5E2" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="SurfaceBrush" Color="#1B2124" />
+          <SolidColorBrush x:Key="SurfaceRaisedBrush" Color="#232A2E" />
+          <SolidColorBrush x:Key="LineBrush" Color="#2E373B" />
+          <SolidColorBrush x:Key="TextBrush" Color="#E6F2EE" />
+          <SolidColorBrush x:Key="TextMutedBrush" Color="#A9B8B4" />
+          <SolidColorBrush x:Key="CloseBrush" Color="#FB8B5B" />
+          <SolidColorBrush x:Key="CloseHoverBrush" Color="#FDA47E" />
+          <SolidColorBrush x:Key="CloseTextBrush" Color="#1B2124" />
+          <SolidColorBrush x:Key="CautionBrush" Color="#E9B949" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver" Color="#14E6F2EE" />
+          <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed" Color="#1FE6F2EE" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrush" Color="#2E373B" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPointerOver" Color="#2E373B" />
+          <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="#2E373B" />
+          <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
+          <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="#2E373B" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+      <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas</FontFamily>
+      <x:Double x:Key="ExpanderMinHeight">36</x:Double>
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+    <Style Selector="Button.close /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CloseBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource CloseTextBrush}" />
+    </Style>
+    <Style Selector="Button.close:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CloseHoverBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource CloseTextBrush}" />
+    </Style>
+    <Style Selector="Button.close:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource CloseHoverBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource CloseTextBrush}" />
+    </Style>
+    <Style Selector="Button.close:disabled">
+      <Setter Property="Opacity" Value="0.5" />
+    </Style>
+  </Application.Styles>
+</Application>
