@@ -96,6 +96,11 @@ vb = (bx0 - pad, by0 - pad, bw + 2 * pad, bh + 2 * pad)
 for name, handle in (("mark.svg", INK), ("mark-dark.svg", HANDLE_DARK)):
     (out / name).write_text(svg(vb[2], vb[3], pebble(handle), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
 
+# --- tray.svg: square and tight, so the mascot fills a 16 px tray icon (source of sweepling.ico) ---
+side = max(bw, bh) + 2 * pad
+vb = (bx0 + bw / 2 - side / 2, by0 + bh / 2 - side / 2, side, side)
+(out / "tray.svg").write_text(svg(side, side, pebble(INK), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
+
 # --- lockups: the mark plus "sweepling" in Fredoka SemiBold, outlined ----------------
 font = TTFont(font_path)
 upm = font["head"].unitsPerEm
