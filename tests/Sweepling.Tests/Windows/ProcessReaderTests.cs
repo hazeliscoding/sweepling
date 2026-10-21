@@ -8,7 +8,7 @@ using Sweepling.Windows;
 namespace Sweepling.Tests.Windows;
 
 /// <summary>Real processes, started and stopped by the test itself; nothing else on the machine is touched.</summary>
-public sealed class ProcessSnapshotTests
+public sealed class ProcessReaderTests
 {
     private const int FakeAgentPid = 424242;
 
@@ -27,6 +27,7 @@ public sealed class ProcessSnapshotTests
             }
             """], Environment.GetEnvironmentVariable);
         var tracker = new Tracker(rules);
+        var reader = new ProcessReader(rules.AgentPidVariable);
 
         // The parent stands in for an agent: it starts a child that listens on the port, waits, then exits.
         // The child gives up on its own after a minute, so a failed test can't leave it running.
@@ -50,7 +51,7 @@ public sealed class ProcessSnapshotTests
             Proc? child = null;
             WaitUntil("the child to start", () =>
             {
-                var snapshot = ProcessSnapshot.Take(rules.AgentPidVariable);
+                var snapshot = reader.Take();
                 tracker.Update(snapshot);
                 foreach (var p in snapshot.Processes.Where(p => p.ParentPid == parent.Id))
                 {
@@ -63,14 +64,14 @@ public sealed class ProcessSnapshotTests
             var pid = child!.Pid;
             Assert.True(parent.WaitForExit(TimeSpan.FromSeconds(30)), "the agent didn't exit");
 
-            var listening = WaitFor("the child to listen", () => ProcessSnapshot.Take(rules.AgentPidVariable), s => s.Listening.GetValueOrDefault(pid)?.Contains(port) == true);
+            var listening = WaitFor("the child to listen", () => reader.Take(), s => s.Listening.GetValueOrDefault(pid)?.Contains(port) == true);
             Assert.Equal(FakeAgentPid, Assert.Single(listening.Processes, p => p.Pid == pid).AgentPid);
             var group = Assert.Single(tracker.Update(listening, ignoreGrace: true), g => g.Members.Any(m => m.Pid == pid));
             Assert.Equal((SessionState.Ended, Tie.Traced, port), (group.Session, group.Tie, Assert.Single(group.Ports)));
 
             using var client = new TcpClient();
             client.Connect(IPAddress.Loopback, port);
-            var connected = WaitFor("the connection", () => ProcessSnapshot.Take(rules.AgentPidVariable), s => s.Connected.Contains(pid));
+            var connected = WaitFor("the connection", () => reader.Take(), s => s.Connected.Contains(pid));
             Assert.DoesNotContain(tracker.Update(connected, ignoreGrace: true), g => g.Members.Any(m => m.Pid == pid));
         }
         finally
@@ -87,10 +88,10 @@ public sealed class ProcessSnapshotTests
     public void A_snapshot_sees_this_users_processes_but_not_itself_or_the_systems()
     {
         var marker = "sweepling-test-" + Guid.NewGuid().ToString("N")[..8];
-        using var sleeper = Process.Start(new ProcessStartInfo("powershell.exe", $"-NoProfile -NonInteractive -Command \"Start-Sleep -Seconds 30 # {marker}\"") { UseShellExecute = false, CreateNoWindow = true })!;
+        using var sleeper = StartSleeper(marker);
         try
         {
-            var snapshot = ProcessSnapshot.Take("CLAUDE_PID");
+            var snapshot = new ProcessReader("CLAUDE_PID").Take();
 
             var seen = Assert.Single(snapshot.Processes, p => p.Pid == sleeper.Id);
             Assert.Contains(marker, seen.CommandLine);
@@ -105,6 +106,39 @@ public sealed class ProcessSnapshotTests
             Stop(sleeper);
         }
     }
+
+    [Fact]
+    public void A_reader_reuses_what_it_read_yet_sees_processes_start_and_end()
+    {
+        var reader = new ProcessReader("CLAUDE_PID");
+        var before = reader.Take().Processes.Count;
+        var marker = "sweepling-test-" + Guid.NewGuid().ToString("N")[..8];
+        using var sleeper = StartSleeper(marker);
+        var started = new DateTimeOffset(sleeper.StartTime);
+        try
+        {
+            var seen = Assert.Single(reader.Take().Processes, p => p.Pid == sleeper.Id);
+            Assert.Contains(marker, seen.CommandLine);
+            Assert.Equal(seen, Assert.Single(reader.Take().Processes, p => p.Pid == sleeper.Id));
+            Assert.True(before > 0);
+        }
+        finally
+        {
+            Stop(sleeper);
+            sleeper.WaitForExit();
+        }
+
+        Assert.DoesNotContain(reader.Take().Processes, p => p.Pid == sleeper.Id && p.Started == started);
+    }
+
+    private static Process StartSleeper(string marker) =>
+        Process.Start(new ProcessStartInfo("powershell.exe", $"-NoProfile -NonInteractive -Command \"Start-Sleep -Seconds 30 # {marker}\"")
+        {
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+        })!;
 
     private static string Encode(string script) => Convert.ToBase64String(Encoding.Unicode.GetBytes(script));
 

@@ -44,7 +44,7 @@ internal static class Program
             return 2;
         }
 
-        var snapshot = ProcessSnapshot.Take(rules.AgentPidVariable);
+        var snapshot = new ProcessReader(rules.AgentPidVariable).Take();
         var groups = new Tracker(rules).Update(snapshot, ignoreGrace: true);
         Console.WriteLine(ScanReport.Json(groups, snapshot.Taken, Environment.GetEnvironmentVariable("USERPROFILE")));
         return 0;

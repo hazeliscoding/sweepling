@@ -1,18 +1,18 @@
 namespace Sweepling.Windows;
 
 /// <summary>Tells a windowed (GUI) app from a console program by the subsystem in its executable's PE header.</summary>
-internal static class ImageSubsystem
+internal sealed class ImageSubsystem
 {
     private const ushort WindowsGui = 2;
 
-    private static readonly Dictionary<string, bool> Seen = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, bool> _seen = new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>An image that can't be read counts as windowed, so Sweepling never offers it.</summary>
-    public static bool IsWindowed(string imagePath)
+    public bool IsWindowed(string imagePath)
     {
-        if (!Seen.TryGetValue(imagePath, out var windowed))
+        if (!_seen.TryGetValue(imagePath, out var windowed))
         {
-            Seen[imagePath] = windowed = Read(imagePath) is not { } subsystem || subsystem == WindowsGui;
+            _seen[imagePath] = windowed = Read(imagePath) is not { } subsystem || subsystem == WindowsGui;
         }
 
         return windowed;

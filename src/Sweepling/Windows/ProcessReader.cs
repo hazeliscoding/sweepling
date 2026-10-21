@@ -16,8 +16,10 @@ namespace Sweepling.Windows;
 /// <summary>
 /// Reads the current user's processes in this Windows session, and the TCP table, without admin rights.
 /// A process Sweepling can't open belongs to someone else or is protected by Windows, and is left out.
+/// What never changes for a process is kept by its PID and start time, so a snapshot every few seconds
+/// reads only the processes that are new. Use one reader from one thread.
 /// </summary>
-public static unsafe class ProcessSnapshot
+public sealed unsafe class ProcessReader(string? agentPidVariable)
 {
     // x64 layout: PEB.ProcessParameters, then RTL_USER_PROCESS_PARAMETERS.Environment and EnvironmentSize.
     private const int ProcessParametersOffset = 0x20;
@@ -26,22 +28,36 @@ public static unsafe class ProcessSnapshot
     private const int MaxEnvironmentBytes = 1 << 20;
     private const int MaxCommandLineBytes = 1 << 20;
 
-    public static Snapshot Take(string? agentPidVariable)
+    private readonly uint _own = (uint)Environment.ProcessId;
+    private readonly ImageSubsystem _images = new();
+    private uint _session;
+    private byte[]? _me;
+
+    // A process's details, or null when it isn't the current user's; and agent PIDs already looked up.
+    private Dictionary<(int Pid, DateTimeOffset Started), Proc?> _known = [];
+    private Dictionary<(int Pid, DateTimeOffset Started), int?> _agentPids = [];
+
+    public Snapshot Take()
     {
-        var processes = Processes(agentPidVariable);
+        var processes = Processes();
         var (connected, listening) = TcpTable.Read();
         return new Snapshot(DateTimeOffset.Now, processes, connected) { Listening = listening };
     }
 
-    private static List<Proc> Processes(string? agentPidVariable)
+    private List<Proc> Processes()
     {
-        var own = (uint)Environment.ProcessId;
-        if (!PInvoke.ProcessIdToSessionId(own, out var session) || UserSid(PInvoke.GetCurrentProcess()) is not { } me)
+        if (_me is null)
         {
-            throw new Win32Exception();
+            if (!PInvoke.ProcessIdToSessionId(_own, out _session) || UserSid(PInvoke.GetCurrentProcess()) is not { } me)
+            {
+                throw new Win32Exception();
+            }
+
+            _me = me;
         }
 
         var processes = new List<Proc>();
+        var seen = new Dictionary<(int Pid, DateTimeOffset Started), Proc?>();
         var snapshot = PInvoke.CreateToolhelp32Snapshot(CREATE_TOOLHELP_SNAPSHOT_FLAGS.TH32CS_SNAPPROCESS, 0);
         if ((nint)snapshot.Value == -1)
         {
@@ -54,13 +70,13 @@ public static unsafe class ProcessSnapshot
             for (var more = PInvoke.Process32FirstW(snapshot, &entry); more; more = PInvoke.Process32NextW(snapshot, &entry))
             {
                 // Sweepling itself, the idle process and System are never candidates.
-                if (entry.th32ProcessID == own || entry.th32ProcessID <= 4
-                    || !PInvoke.ProcessIdToSessionId(entry.th32ProcessID, out var theirs) || theirs != session)
+                if (entry.th32ProcessID == _own || entry.th32ProcessID <= 4
+                    || !PInvoke.ProcessIdToSessionId(entry.th32ProcessID, out var theirs) || theirs != _session)
                 {
                     continue;
                 }
 
-                if (Read(entry.th32ProcessID, entry.th32ParentProcessID, me) is { } process)
+                if (Read(entry.th32ProcessID, entry.th32ParentProcessID, seen) is { } process)
                 {
                     processes.Add(process);
                 }
@@ -71,6 +87,7 @@ public static unsafe class ProcessSnapshot
             PInvoke.CloseHandle(snapshot);
         }
 
+        _known = seen;
         if (agentPidVariable is null)
         {
             return processes;
@@ -78,20 +95,33 @@ public static unsafe class ProcessSnapshot
 
         // Only a process whose parent is gone needs its agent PID, and reading another process's memory isn't free.
         var byPid = processes.ToDictionary(p => p.Pid);
+        var looked = new Dictionary<(int Pid, DateTimeOffset Started), int?>();
         for (var i = 0; i < processes.Count; i++)
         {
             var p = processes[i];
-            var orphaned = !byPid.TryGetValue(p.ParentPid, out var parent) || parent.Started > p.Started;
-            if (orphaned && AgentPid((uint)p.Pid, p.Started, agentPidVariable) is { } agentPid)
+            if (byPid.TryGetValue(p.ParentPid, out var parent) && parent.Started <= p.Started)
             {
-                processes[i] = p with { AgentPid = agentPid };
+                continue;
+            }
+
+            var key = (p.Pid, p.Started);
+            if (!_agentPids.TryGetValue(key, out var agentPid))
+            {
+                agentPid = AgentPid((uint)p.Pid, p.Started, agentPidVariable);
+            }
+
+            looked[key] = agentPid;
+            if (agentPid is { } found)
+            {
+                processes[i] = p with { AgentPid = found };
             }
         }
 
+        _agentPids = looked;
         return processes;
     }
 
-    private static Proc? Read(uint pid, uint parentPid, byte[] me)
+    private Proc? Read(uint pid, uint parentPid, Dictionary<(int Pid, DateTimeOffset Started), Proc?> seen)
     {
         var process = PInvoke.OpenProcess(PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
         if (process.IsNull)
@@ -101,18 +131,23 @@ public static unsafe class ProcessSnapshot
 
         try
         {
+            // The start time tells a known process from a new one that reused its PID.
             FILETIME created, exited, kernel, user;
-            if (UserSid(process) is not { } owner || !owner.AsSpan().SequenceEqual(me)
-                || !PInvoke.GetProcessTimes(process, &created, &exited, &kernel, &user)
-                || ImagePath(process) is not { } image)
+            if (!PInvoke.GetProcessTimes(process, &created, &exited, &kernel, &user))
             {
                 return null;
             }
 
-            return new Proc((int)pid, (int)parentPid, Started(created), image, CommandLine(process) ?? "")
+            var key = ((int)pid, Started(created));
+            if (!_known.TryGetValue(key, out var known))
             {
-                Windowed = ImageSubsystem.IsWindowed(image),
-            };
+                known = UserSid(process) is { } owner && owner.AsSpan().SequenceEqual(_me) && ImagePath(process) is { } image
+                    ? new Proc((int)pid, (int)parentPid, key.Item2, image, CommandLine(process) ?? "") { Windowed = _images.IsWindowed(image) }
+                    : null;
+            }
+
+            seen[key] = known;
+            return known;
         }
         finally
         {
