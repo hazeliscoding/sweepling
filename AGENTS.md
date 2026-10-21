@@ -51,7 +51,11 @@ One meaning per term. Code, docs, UI copy and agents use these words and no syno
 
 ## Commands
 
-Added with M0's scaffold.
+- `dotnet build Sweepling.slnx` and `dotnet test --solution Sweepling.slnx` from the repo root.
+- `dotnet format Sweepling.slnx --verify-no-changes` is the CI style check. Run `dotnet format Sweepling.slnx` before committing.
+- `dotnet publish src/Sweepling -c Release -r win-x64 -o artifacts/publish` makes the NativeAOT build. It needs Visual Studio's C++ workload. If linking fails with "'vswhere.exe' is not recognized", put `%ProgramFiles(x86)%\Microsoft Visual Studio\Installer` on PATH: VS 18's `vcvarsall.bat` calls `vswhere.exe` by bare name, and the error text lands in the linker path.
+- Idle memory is measured on the NativeAOT build with no window open, next to Prompuff closed to the tray, both read at the same moment: working set, private bytes, and private working set (Task Manager's Memory column), from `Get-Process` and `Win32_PerfFormattedData_PerfProc_Process`. Run Prompuff on a scratch `PROMPUFF_DATA_DIR` whose `settings.json` turns `keepRunningInTray` on, so the owner's library and settings are never touched.
+- `dotnet run scripts/make-icons.cs` rebuilds `docs/brand/sweepling.ico` from `docs/brand/tray.svg`; `scripts/make_brand.py` regenerates the SVGs (see its header).
 
 ## Working style
 
