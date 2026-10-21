@@ -62,6 +62,29 @@ public sealed class DescribeTests
         Assert.Equal("C--gone-app", Describe.ProjectFromClaudeTemp(@"tail -f C:\Users\test\AppData\Local\Temp\claude\C--gone-app\0b6c\x.output", _ => false));
 
     [Fact]
+    public void A_groups_folder_is_its_first_native_members_folder()
+    {
+        var bash = P(1, 0, 0, Bash, "bash /c/nvm4w/nodejs/npm start");
+        var node = P(2, 1, 0, Node, "node ng serve --port 4300");
+        var group = new Group(SessionState.Ended, Tie.CommandLine, [bash], [bash, node], [4300]);
+
+        Assert.Equal(@"C:\code\portfolio", Describe.Folder(group, p => p.Pid == 2 ? @"C:\code\portfolio" : null, _ => false));
+    }
+
+    [Fact]
+    public void A_group_of_git_bash_watchers_takes_its_folder_from_a_claude_temp_path()
+    {
+        var tail = P(1, 0, 0, Tail, $"tail -n +1 -f {TaskOutput}");
+        string[] existing = [@"C:\code", @"C:\code\app"];
+
+        Assert.Equal(@"C:\code\app", Describe.Folder(new Group(SessionState.Ended, Tie.CommandLine, [tail], [tail], []), _ => null, existing.Contains));
+    }
+
+    [Fact]
+    public void A_group_with_no_folder_says_so() =>
+        Assert.Null(Describe.Folder(new Group(SessionState.Ended, Tie.Environment, [P(1, 0, 0, Node)], [P(1, 0, 0, Node)], []), _ => null, _ => true));
+
+    [Fact]
     public void A_command_line_without_a_claude_temp_path_has_no_project() =>
         Assert.Null(Describe.ProjectFromClaudeTemp("node server.js", _ => true));
 }

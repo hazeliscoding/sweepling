@@ -37,6 +37,14 @@ public static partial class Describe
     }
 
     /// <summary>
+    /// The group's folder: its first member's that has one, which skips Git Bash programs, else the project
+    /// a Claude Code temp path names, as Git Bash watchers carry.
+    /// </summary>
+    public static string? Folder(Group group, Func<Proc, string?> currentDirectory, Func<string, bool> directoryExists) =>
+        group.Members.Select(currentDirectory).FirstOrDefault(f => f is not null)
+        ?? group.Members.Select(m => ProjectFromClaudeTemp(m.CommandLine, directoryExists)).FirstOrDefault(f => f is not null);
+
+    /// <summary>
     /// The project folder in a Claude Code temp path, such as <c>%TEMP%\claude\C--code-gil-sweep\...</c>.
     /// Claude writes both separators and hyphens as hyphens, so the folder is rebuilt from what exists on disk;
     /// when nothing matches, the name is returned as Claude wrote it.
