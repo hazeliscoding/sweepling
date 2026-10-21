@@ -41,6 +41,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - **Brand: option 1A, "Pebble",** a round mint critter holding a tiny broom, picked from four takes on the claude.ai design canvas "Sweepling logo". It has the cleanest silhouette at 16 px in the tray, and a count badge sits clear of its face. The wordmark is Fredoka SemiBold, outlined. This gives up the fluffier Puff and the story of the mid-sweep option. Assets and the review window's starting tokens are in `docs/brand/`.
 - **The review window uses the system font,** Segoe UI Variable, with Cascadia Mono for command lines. Bundling fonts would grow the install for no gain in a utility window. This gives up the mascot's rounded type inside the app.
 - **Idle memory is compared on three counters, and the ceiling holds on each:** working set, private bytes, and private working set, which is Task Manager's Memory column. Prompuff's 7.7 MB wasn't reproduced: closed to the tray, it measured 44.1 MB private working set after 60 s, and nobody recorded which counter the 7.7 MB came from. Reading all three for both apps at the same moment doesn't depend on that number. Prompuff's desktop build is self-contained without NativeAOT, so it sets a cost to beat, not a like-for-like baseline. This gives up quoting one idle number.
+- **The Fluent theme loads from M0.** Avalonia draws the tray menu itself, and with no theme its items have no template, so the menu opened empty. Fluent is the theme Gil Sweep and Prompuff use, and idle memory moved by under 3 MB on every counter. This gives up a 10 MB exe: it is 17 MB now.
 - **Left to the builder,** to settle with tests and record here: the snapshot interval and grace periods; the rules file's format and versioning, which must work under NativeAOT; the review window layout and the notification mechanism, with NativeAOT-compatible dependencies only; whether the family tree persists across restarts; how to tell that an untraced stray's session has ended; close order, and whether to try a gentle close first.
 
 ## M0: Placeholder
@@ -59,13 +60,15 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - CI passed on `main`: [run 39640909172](https://github.com/hazeliscoding/sweepling/actions/runs/39640909172).
 - Throwaway pull request #1 planted a fake GitHub token, and its secrets job failed on the history scan: [run 39641685650](https://github.com/hazeliscoding/sweepling/actions/runs/39641685650). It was closed without merging.
 - Trim and AOT warnings fail the build: a `Type.GetType(string)` call added to `Program.cs` stopped it with `error IL2057`.
-- Idle memory, both in the tray with no window open, read at the same moment. Prompuff is the installed 1.1.1 release on a scratch data folder with `keepRunningInTray` on, 60 s after its window closed. Sweepling is the NativeAOT build after 50 minutes idle; at 60 s it read 38.9, 63.5 and 7.4 MB.
+- Quit, tested through the real Windows 11 tray with UI Automation, which found the icon by name before each click. The icon sits in the hidden-icons overflow, named "Sweepling". Right-clicking it opens a menu holding exactly "Quit", and Quit ended the process within the wait, left no child process, and removed the icon. The first try opened an empty menu: with no theme, Avalonia's tray menu items have no template. Adding the Fluent theme fixed it.
+- The tray icon's broom handle is brown, so it shows on a dark taskbar as well as a light one.
+- Idle memory, both in the tray with no window open, read at the same moment. Prompuff is the installed 1.1.1 release on a scratch data folder with `keepRunningInTray` on, 60 s after its window closed. Sweepling is the NativeAOT build with the Fluent theme, 74 s after it started. Before the theme, Sweepling read 38.9, 63.5 and 7.4 MB.
 
   | | Working set | Private bytes | Private working set |
   |---|---|---|---|
-  | Prompuff 1.1.1 | 149.4 MB | 132.5 MB | 44.1 MB |
-  | Sweepling | 40.3 MB | 64.3 MB | 8.2 MB |
-  | Sweepling as a share of Prompuff | 27% | 49% | 19% |
+  | Prompuff 1.1.1 | 149.3 MB | 131.1 MB | 46.3 MB |
+  | Sweepling | 40.5 MB | 65.9 MB | 8.0 MB |
+  | Sweepling as a share of Prompuff | 27% | 50% | 17% |
 
   Within the ceiling, twice Prompuff's, on every counter.
 
