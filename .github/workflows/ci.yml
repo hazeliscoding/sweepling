@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      DOTNET_NOLOGO: true
+      DOTNET_CLI_TELEMETRY_OPTOUT: true
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Sweepling.slnx
+
+      - name: Build
+        run: dotnet build Sweepling.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test --solution Sweepling.slnx --configuration Release --no-build
+
+      - name: Format
+        run: dotnet format Sweepling.slnx --verify-no-changes --no-restore
+
+      # Trim and AOT warnings are errors, so a dependency NativeAOT can't take fails here.
+      - name: Publish (NativeAOT)
+        run: dotnet publish src/Sweepling --configuration Release --runtime win-x64 --output artifacts/publish
+
+  secrets:
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      # Copied from that release's checksums file. Bump both together.
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # The release binary, pinned by checksum: the gitleaks Action needs a paid license for orgs.
+      - name: Install gitleaks
+        working-directory: ${{ runner.temp }}
+        run: |
+          base="https://github.com/gitleaks/gitleaks/releases/download/v$GITLEAKS_VERSION"
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          checksums="gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          curl -sSfLO "$base/$tarball"
+          curl -sSfLO "$base/$checksums"
+          grep -qx "$GITLEAKS_SHA256  $tarball" "$checksums"
+          sha256sum --check --ignore-missing "$checksums"
+          tar -xzf "$tarball" gitleaks
+
+      # Positive control: the token is built at run time, so no literal reaches the history.
+      - name: Check gitleaks catches a planted token
+        run: |
+          dir="$(mktemp -d)"
+          echo "token = \"ghp_$(openssl rand -hex 18)\"" > "$dir/leak.txt"
+          if "$RUNNER_TEMP/gitleaks" dir "$dir" --no-banner --redact; then
+            echo "gitleaks missed a planted token"
+            exit 1
+          fi
+
+      # Only HEAD's history: scanning every ref would let one branch's leak fail every run.
+      - name: Scan the full history for secrets
+        run: |
+          "$RUNNER_TEMP/gitleaks" git --log-opts="--full-history HEAD" --no-banner --redact --verbose
