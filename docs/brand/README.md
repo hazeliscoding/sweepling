@@ -6,7 +6,7 @@ The mascot is option 1A, "Pebble", chosen on 2026-10-21 from the claude.ai desig
 - `lockup.svg` / `lockup-dark.svg`: the mascot plus the "sweepling" wordmark, for light and dark backgrounds.
 - The wordmark is Fredoka SemiBold, lowercase, with -0.01em letter spacing, converted to paths because GitHub can't load web fonts inside SVGs. Use the SVGs; don't re-typeset it.
 - `scripts/make_brand.py` regenerates all four from the Fredoka font (OFL); its header says how.
-- The tray icon is the mark cropped tighter. It closes its eyes when there is nothing to sweep, and carries a count badge when there are leftovers.
+- `tray.svg` is the mark cropped square and tight, so it fills a 16 px tray icon. Its broom handle is brown `#B07A3B`, which keeps 3:1 contrast on light and dark taskbars, so one icon serves both. `scripts/make-icons.cs` turns it into `sweepling.ico`. From M2 the tray icon closes its eyes when there is nothing to sweep, and carries a count badge when there are leftovers.
 
 ## Design tokens
 

@@ -25,6 +25,8 @@ MINT = "#BDE7DA"
 STRAW = "#E9B949"
 BLUSH = "#F2A69B"
 HANDLE_DARK = "#E7D7B5"
+# The taskbar can be light or dark; this brown keeps 3:1 against both, so one tray icon serves.
+HANDLE_TRAY = "#B07A3B"
 WORD = INK
 WORD_DARK = "#E6F2EE"
 
@@ -99,7 +101,7 @@ for name, handle in (("mark.svg", INK), ("mark-dark.svg", HANDLE_DARK)):
 # --- tray.svg: square and tight, so the mascot fills a 16 px tray icon (source of sweepling.ico) ---
 side = max(bw, bh) + 2 * pad
 vb = (bx0 + bw / 2 - side / 2, by0 + bh / 2 - side / 2, side, side)
-(out / "tray.svg").write_text(svg(side, side, pebble(INK), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
+(out / "tray.svg").write_text(svg(side, side, pebble(HANDLE_TRAY), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
 
 # --- lockups: the mark plus "sweepling" in Fredoka SemiBold, outlined ----------------
 font = TTFont(font_path)
