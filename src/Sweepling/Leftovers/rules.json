@@ -16,6 +16,11 @@
       "name": "a dev server started from Git Bash",
       "image": "[\\\\/]Git[\\\\/]usr[\\\\/]bin[\\\\/](ba)?sh\\.exe$",
       "commandLine": "\\b(npm|npx|pnpm|yarn|ng|next|vite)\\b"
+    },
+    {
+      "name": "a watcher's grep from Git Bash",
+      "image": "[\\\\/]Git[\\\\/]usr[\\\\/]bin[\\\\/]grep\\.exe$",
+      "commandLine": "--line-buffered"
     }
   ],
   "protect": [

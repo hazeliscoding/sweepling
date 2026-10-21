@@ -50,6 +50,10 @@ public sealed class RulesTests
         Assert.True(Fake.Rules.TiesStray(P(1, 0, 0, Bash, "bash /c/nvm4w/nodejs/npm start -- --port 4300")));
 
     [Fact]
+    public void A_line_buffered_grep_from_git_bash_ties_a_stray() =>
+        Assert.True(Fake.Rules.TiesStray(P(1, 0, 0, Grep, "\"C:\\Program Files\\Git\\usr\\bin\\grep.exe\" --line-buffered -E \"ok |DONE\"")));
+
+    [Fact]
     public void A_dev_server_started_elsewhere_does_not_tie_a_stray() =>
         Assert.False(Fake.Rules.TiesStray(P(1, 0, 0, Node, "node npm-cli.js start")));
 
