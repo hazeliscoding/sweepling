@@ -22,7 +22,7 @@ A Claude Code session starts dev servers, file watchers and little scripts. When
 ## What it does
 
 - Every few seconds it takes a snapshot of your processes and keeps a family tree for each Claude Code session.
-- It offers a process only when its parent has been gone for a while, it belongs to a Claude Code session, nothing in its group has an open TCP connection, and it isn't on the protect list.
+- It offers a process only when its parent has been gone for a while, it belongs to a Claude Code session, nothing in its group has an open TCP connection or is a windowed app, and it isn't on the protect list.
 - Strays of a session that is still running are shown in their own section, never ticked.
 - It sees only your own processes and never asks for administrator rights.
 
@@ -63,7 +63,7 @@ flowchart TD
 
 ## Status
 
-**Planning.** There is nothing to install yet. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
+**In development.** There is nothing to install yet. A build from source can already find leftovers: `Sweepling.exe --scan > scan.json` lists what it would offer, and closes nothing. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
 
 ## Alternatives
 
