@@ -29,7 +29,7 @@ public sealed unsafe class NotifyIcon : IDisposable
     private static readonly uint TaskbarCreated = PInvoke.RegisterWindowMessage("TaskbarCreated");
 
     // The window procedure is static, and Sweepling has one tray icon.
-    private static NotifyIcon? s_current;
+    private static NotifyIcon? _current;
 
     private readonly SynchronizationContext _ui;
     private readonly HWND _window;
@@ -39,7 +39,7 @@ public sealed unsafe class NotifyIcon : IDisposable
     public NotifyIcon(byte[] icon, string tooltip)
     {
         _ui = SynchronizationContext.Current ?? throw new InvalidOperationException("Create the tray icon on the UI thread.");
-        s_current = this;
+        _current = this;
         var instance = PInvoke.GetModuleHandle((PCWSTR)null);
         fixed (char* name = ClassName)
         {
@@ -95,7 +95,7 @@ public sealed unsafe class NotifyIcon : IDisposable
         PInvoke.Shell_NotifyIcon(NOTIFY_ICON_MESSAGE.NIM_DELETE, &data);
         PInvoke.DestroyWindow(_window);
         PInvoke.DestroyIcon(_icon);
-        s_current = null;
+        _current = null;
     }
 
     /// <summary>The smallest image in an .ico file at least <paramref name="size"/> pixels wide, else the largest.</summary>
@@ -200,7 +200,7 @@ public sealed unsafe class NotifyIcon : IDisposable
     [UnmanagedCallersOnly(CallConvs = [typeof(CallConvStdcall)])]
     private static LRESULT WindowProcedure(HWND window, uint message, WPARAM wParam, LPARAM lParam)
     {
-        if (s_current is { } icon && window == icon._window)
+        if (_current is { } icon && window == icon._window)
         {
             if (message == CallbackMessage)
             {
