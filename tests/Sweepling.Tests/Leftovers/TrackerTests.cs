@@ -214,6 +214,28 @@ public sealed class TrackerTests
     }
 
     [Fact]
+    public void A_group_with_a_windowed_app_is_not_offered()
+    {
+        var app = P(300, 200, -40, Profile + @"\AppData\Local\Programs\Pet\pet.exe", "pet.exe", agentPid: 100) with { Windowed = true };
+        var tracker = new Tracker(Fake.Rules);
+        tracker.Update(At(0, app));
+
+        Assert.Empty(tracker.Update(At(61, app)));
+    }
+
+    [Fact]
+    public void A_protected_windowed_process_does_not_keep_its_group_from_being_offered()
+    {
+        var console = P(400, 300, -39, @"C:\WINDOWS\system32\conhost.exe", "conhost.exe 0xffffffff -ForceV1") with { Windowed = true };
+        var tracker = Watching(Session, Shell, DevServer, console);
+        tracker.Update(At(0, DevServer, console));
+
+        var group = Assert.Single(tracker.Update(At(61, DevServer, console)));
+
+        Assert.Equal([300], group.Members.Select(p => p.Pid));
+    }
+
+    [Fact]
     public void A_group_lists_the_ports_its_members_listen_on()
     {
         var tracker = Watching(Session, Shell, DevServer);

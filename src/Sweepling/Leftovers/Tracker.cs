@@ -110,8 +110,9 @@ public sealed class Tracker(Rules rules)
                 continue;
             }
 
+            // An app an agent opened, like a desktop pet or Docker Desktop, is in use even with no connection.
             var members = subtree.Where(p => !rules.IsProtected(p)).ToList();
-            if (members.Count == 0)
+            if (members.Count == 0 || members.Any(p => p.Windowed))
             {
                 continue;
             }
