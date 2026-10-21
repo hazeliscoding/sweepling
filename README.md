@@ -1,4 +1,9 @@
-# Sweepling
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/brand/lockup-dark.svg">
+    <img alt="Sweepling" src="docs/brand/lockup.svg" height="48">
+  </picture>
+</h1>
 
 **Sweepling notices the processes your Claude Code sessions left running on Windows, and closes them only after you say so.**
 

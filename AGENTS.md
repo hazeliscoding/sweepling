@@ -43,6 +43,12 @@ One meaning per term. Code, docs, UI copy and agents use these words and no syno
 - A general-purpose helper only after checking that nothing in the project, the .NET base library or CsWin32 already does the job.
 - Never a framework, or anything that adds a process, a WebView or a network call, without asking.
 
+## Brand
+
+- The assets are in `docs/brand/`. `-dark` files are for dark backgrounds.
+- The wordmark is outlined Fredoka SemiBold. Use the SVGs; don't re-typeset it with a web font. `scripts/make_brand.py` regenerates them.
+- UI colors come from the tokens in `docs/brand/README.md`. Every text pair there passes WCAG AA; a new text or focus color on a surface needs its pair checked before it ships. Mascot colors are never text colors.
+
 ## Commands
 
 Added with M0's scaffold.
