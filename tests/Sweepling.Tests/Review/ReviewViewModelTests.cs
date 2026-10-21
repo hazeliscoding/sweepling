@@ -59,6 +59,26 @@ public sealed class ReviewViewModelTests
     }
 
     [Fact]
+    public void A_row_sums_up_where_how_old_and_which_port_on_one_line()
+    {
+        var model = Model();
+
+        model.Show([Leftover]);
+
+        Assert.Equal((@"C:\repos\pdfcraft · 35 h · port 3001", "1 process"), (model.Leftovers[0].Summary, model.Leftovers[0].ProcessesLabel));
+    }
+
+    [Fact]
+    public void Only_sections_with_groups_show_and_an_empty_window_says_so()
+    {
+        var model = Model();
+        Assert.Equal((false, false, true), (model.HasLeftovers, model.HasStillRunning, model.IsEmpty));
+
+        model.Show([Running]);
+        Assert.Equal((false, true, false), (model.HasLeftovers, model.HasStillRunning, model.IsEmpty));
+    }
+
+    [Fact]
     public void A_refresh_keeps_what_the_person_ticked()
     {
         var model = Model();

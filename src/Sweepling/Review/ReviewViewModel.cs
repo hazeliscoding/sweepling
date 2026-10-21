@@ -9,7 +9,10 @@ namespace Sweepling.Review;
 /// <summary>What the window shows beyond the group itself, read from the running processes.</summary>
 public sealed record ReviewFacts(Func<Group, string?> Folder, Func<Group, long?> Memory);
 
-public sealed record ProcessRow(string Name, int Pid, string CommandLine);
+public sealed record ProcessRow(string Name, int Pid, string CommandLine)
+{
+    public string Line => $"{Name} {Pid}  {CommandLine}";
+}
 
 /// <summary>One group in the review window: what it is, where, how old, which port and how much memory.</summary>
 public sealed partial class GroupRow : ObservableObject
@@ -22,6 +25,9 @@ public sealed partial class GroupRow : ObservableObject
 
     [ObservableProperty]
     private string _memory = "";
+
+    [ObservableProperty]
+    private string _summary = "";
 
     public GroupRow(Group group, string? folder, string? userProfile)
     {
@@ -50,6 +56,8 @@ public sealed partial class GroupRow : ObservableObject
 
     public IReadOnlyList<ProcessRow> Processes { get; }
 
+    public string ProcessesLabel => Processes.Count == 1 ? "1 process" : $"{Processes.Count} processes";
+
     internal (int Pid, DateTimeOffset Started) Key => KeyOf(Group);
 
     internal static (int Pid, DateTimeOffset Started) KeyOf(Group group) => (group.Strays[0].Pid, group.Strays[0].Started);
@@ -59,6 +67,7 @@ public sealed partial class GroupRow : ObservableObject
         Group = group;
         Age = AgeOf(now - group.Strays.Min(s => s.Started));
         Memory = memory is { } bytes ? Size(bytes) : "";
+        Summary = string.Join(" · ", new[] { Folder, Age, Port }.Where(s => s.Length > 0));
     }
 
     private static string AgeOf(TimeSpan age) => age switch
@@ -109,6 +118,12 @@ public sealed partial class ReviewViewModel : ObservableObject
 
     public ObservableCollection<GroupRow> StillRunning { get; } = [];
 
+    public bool HasLeftovers => Leftovers.Count > 0;
+
+    public bool HasStillRunning => StillRunning.Count > 0;
+
+    public bool IsEmpty => !HasLeftovers && !HasStillRunning;
+
     public string Heading => Leftovers.Count switch
     {
         0 => "Nothing to sweep",
@@ -129,7 +144,7 @@ public sealed partial class ReviewViewModel : ObservableObject
         var now = _now();
         Sync(Leftovers, groups.Where(g => g.Session == SessionState.Ended), now);
         Sync(StillRunning, groups.Where(g => g.Session == SessionState.Running), now);
-        OnPropertyChanged(nameof(Heading));
+        SectionsChanged();
         Changed();
     }
 
@@ -163,7 +178,7 @@ public sealed partial class ReviewViewModel : ObservableObject
             }
 
             Status = StatusOf(outcomes.Select(o => o.Outcome).ToList());
-            OnPropertyChanged(nameof(Heading));
+            SectionsChanged();
         }
         finally
         {
@@ -244,6 +259,14 @@ public sealed partial class ReviewViewModel : ObservableObject
         {
             Changed();
         }
+    }
+
+    private void SectionsChanged()
+    {
+        OnPropertyChanged(nameof(Heading));
+        OnPropertyChanged(nameof(HasLeftovers));
+        OnPropertyChanged(nameof(HasStillRunning));
+        OnPropertyChanged(nameof(IsEmpty));
     }
 
     private void Changed()
