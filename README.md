@@ -63,7 +63,7 @@ flowchart TD
 
 ## Status
 
-**In development.** There is nothing to install yet. A build from source can already find leftovers: `Sweepling.exe --scan > scan.json` lists what it would offer, and closes nothing. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
+**In development.** There is nothing to install yet. A build from source runs the tray app: it counts leftovers, notifies you when more appear, and closes the groups you tick. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. The installer comes with the release milestone. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
 
 ## Alternatives
 
