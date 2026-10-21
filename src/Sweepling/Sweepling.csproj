@@ -16,6 +16,8 @@
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Sweepling ships for x64 only, as its PEB offsets assume; NOTIFYICONDATAW is laid out per architecture. -->
+    <CsWin32PlatformTarget>x64</CsWin32PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
