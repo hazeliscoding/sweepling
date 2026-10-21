@@ -38,6 +38,13 @@ public sealed partial class Rules
 
     public bool IsProtected(Proc process) => _protect.Any(r => r.Matches(process));
 
+    /// <summary>The shipped rules, plus the user's <c>%APPDATA%\Sweepling\rules.json</c> when there is one.</summary>
+    public static Rules Load()
+    {
+        var user = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sweepling", "rules.json");
+        return Parse(File.Exists(user) ? [ShippedJson, File.ReadAllText(user)] : [ShippedJson], Environment.GetEnvironmentVariable);
+    }
+
     /// <summary>Reads rules files in order: their lists add up, and a later file's settings win.</summary>
     public static Rules Parse(IEnumerable<string> files, Func<string, string?> environment)
     {
