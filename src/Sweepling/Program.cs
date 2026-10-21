@@ -47,6 +47,11 @@ internal static class Program
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .With(new Win32PlatformOptions
+            {
+                // A list of a few dozen rows doesn't need the GPU, whose driver keeps its memory once loaded.
+                RenderingMode = [Win32RenderingMode.Software],
+            })
             .LogToTrace();
 
     /// <summary>Prints the groups Sweepling would offer right now, ignoring the grace period, and closes nothing.</summary>

@@ -73,7 +73,13 @@ public sealed partial class App : Application
 
         // A new window each time, released on close, so memory comes back once it's gone.
         _window = new ReviewWindow(model);
-        _window.Closed += (_, _) => _window = null;
+        _window.Closed += (_, _) =>
+        {
+            _window = null;
+
+            // Hand the window's memory back to Windows rather than keep it for a window that may not open again.
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+        };
         _window.ShowNearTray();
     }
 
