@@ -1,0 +1,28 @@
+// Sweepling's shipped rules. A user file, %APPDATA%\Sweepling\rules.json, adds to each list,
+// and its graceSeconds or agentPidVariable replace these.
+// Patterns are case-insensitive regular expressions. %NAME% stands for that environment
+// variable's path, matching either slash. A rule with both patterns needs both to match.
+{
+  "version": 1,
+  "graceSeconds": 60,
+  "agentPidVariable": "CLAUDE_PID",
+  "agentRoots": [
+    { "name": "Claude Code", "image": "^%USERPROFILE%[\\\\/]\\.local[\\\\/]bin[\\\\/]claude\\.exe$" },
+    { "name": "Claude Code from npm", "image": "[\\\\/]node\\.exe$", "commandLine": "@anthropic-ai[\\\\/]claude-code[\\\\/]" }
+  ],
+  "strays": [
+    { "name": "a Claude Code temp file", "commandLine": "(%TEMP%|/tmp)[\\\\/]claude[\\\\/]" },
+    {
+      "name": "a dev server started from Git Bash",
+      "image": "[\\\\/]Git[\\\\/]usr[\\\\/]bin[\\\\/](ba)?sh\\.exe$",
+      "commandLine": "\\b(npm|npx|pnpm|yarn|ng|next|vite)\\b"
+    }
+  ],
+  "protect": [
+    { "name": "Windows", "image": "^%WINDIR%[\\\\/]" },
+    { "name": "Orca's daemon-host", "image": "[\\\\/]Orca[\\\\/]daemon-host[\\\\/]" },
+    { "name": "a crash handler", "commandLine": "--type=crashpad-handler" },
+    { "name": "an MSBuild node", "commandLine": "MSBuild\\.(dll|exe)\\b.*/nodemode:" },
+    { "name": "a .NET build server", "commandLine": "VBCSCompiler|[\\\\/]rzc\\.dll|/nodeReuse:true" }
+  ]
+}

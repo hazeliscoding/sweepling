@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="..\..\docs\brand\sweepling.ico" Link="Assets\sweepling.ico" />
+    <EmbeddedResource Include="Leftovers\rules.json" LogicalName="Sweepling.rules.json" />
   </ItemGroup>
 
   <ItemGroup>
