@@ -4,6 +4,7 @@ AttachConsole
 CloseHandle
 CreateToolhelp32Snapshot
 GetCurrentProcess
+GetExitCodeProcess
 GetExtendedTcpTable
 GetLengthSid
 GetProcessTimes
@@ -21,5 +22,7 @@ PROCESS_BASIC_INFORMATION
 ProcessIdToSessionId
 QueryFullProcessImageName
 ReadProcessMemory
+TerminateProcess
 TOKEN_USER
 UNICODE_STRING
+WaitForSingleObject

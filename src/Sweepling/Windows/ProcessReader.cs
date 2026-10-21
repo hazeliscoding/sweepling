@@ -308,6 +308,6 @@ public sealed unsafe class ProcessReader(string? agentPidVariable)
         return ok;
     }
 
-    private static DateTimeOffset Started(FILETIME created) =>
+    internal static DateTimeOffset Started(FILETIME created) =>
         DateTimeOffset.FromFileTime(((long)(uint)created.dwHighDateTime << 32) | (uint)created.dwLowDateTime);
 }
