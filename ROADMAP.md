@@ -26,7 +26,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - **Watching.** Every few seconds Sweepling takes a Toolhelp32 snapshot and keeps an in-memory family tree of each Claude Code session.
   - Agent roots are matched by path and command line, not by name: `%USERPROFILE%\.local\bin\claude.exe`, or `node.exe` running `@anthropic-ai/claude-code`. Other apps also have `claude` in their process names.
   - A parent counts as gone if its PID doesn't exist, or belongs to a process that started after the child. Windows doesn't reparent orphans, so a stale parent PID is the only trace.
-  - A stray Sweepling never saw born falls back to command-line rules: Claude temp paths (`%TEMP%\claude\<project>\<session id>\...`), or `npm`, `ng serve`, `next dev` or `vite` started from Git Bash.
+  - A stray Sweepling never saw born falls back to command-line rules: Claude temp paths (`%TEMP%\claude\<project>\<session id>\...`), or `npm`, `ng serve`, `next dev` or `vite` started from Git Bash. *Refined in M1: `CLAUDE_PID` in the stray's environment comes before these rules. See "Strays are tied to a session three ways" below.*
   - It never picks targets by CPU use: cc-reaper's history shows that rule killing people's background builds.
 - **Ended or running.** A session has ended when its agent root is gone. When Sweepling can't tell, it treats the session as running. A wrong "running" only delays an offer; a wrong "ended" offers a live session's processes.
 - **Offered only when all of these hold:**
@@ -42,7 +42,15 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - **The review window uses the system font,** Segoe UI Variable, with Cascadia Mono for command lines. Bundling fonts would grow the install for no gain in a utility window. This gives up the mascot's rounded type inside the app.
 - **Idle memory is compared on three counters, and the ceiling holds on each:** working set, private bytes, and private working set, which is Task Manager's Memory column. Prompuff's 7.7 MB wasn't reproduced: closed to the tray, it measured 44.1 MB private working set after 60 s, and nobody recorded which counter the 7.7 MB came from. Reading all three for both apps at the same moment doesn't depend on that number. Prompuff's desktop build is self-contained without NativeAOT, so it sets a cost to beat, not a like-for-like baseline. This gives up quoting one idle number.
 - **The Fluent theme loads from M0.** Avalonia draws the tray menu itself, and with no theme its items have no template, so the menu opened empty. Fluent is the theme Gil Sweep and Prompuff use, and idle memory moved by under 3 MB on every counter. This gives up a 10 MB exe: it is 17 MB now.
-- **Left to the builder,** to settle with tests and record here: the snapshot interval and grace periods; the rules file's format and versioning, which must work under NativeAOT; the review window layout and the notification mechanism, with NativeAOT-compatible dependencies only; whether the family tree persists across restarts; how to tell that an untraced stray's session has ended; close order, and whether to try a gentle close first.
+- **Strays are tied to a session three ways, strongest first.** First the family tree Sweepling watched form. Then `CLAUDE_PID`, which Claude Code puts in the environment of everything it starts, next to `CLAUDE_CODE_SESSION_ID`. Then the command-line rules. A traced stray's session has ended when its agent root is gone. An environment-tied stray's has ended when its `CLAUDE_PID` is gone or now belongs to a newer process. A rule-tied stray's session is unknown, so it counts as running unless every live agent root started after the stray. This settles how to tell that an untraced stray's session has ended. It gives up precision for rule-tied strays, which stay under Session still running while any older session lives.
+- **Git Bash processes are tied by command line only.** They hand Windows a 7-variable environment with no `CLAUDE_*` variables, while native programs started from Git Bash, like `node`, carry the whole environment. So a shipped rule ties Git's `grep --line-buffered`, the other half of a `tail -f | grep` watcher, which has no other marker. This gives up any Git Bash stray that no rule matches.
+- **A group is the strays that shared one dead parent and started within 10 s of each other, plus their descendants.** Protected processes are left out one by one, so a dev server under `cmd.exe` still closes with its tree, and `cmd.exe` ends once its child does. A live agent root is left out with everything under it. This gives up closing a protected process inside a leftover's tree.
+- **A group with a windowed app is never offered.** The executable's PE header tells a windowed app from a console program, and an image that can't be read counts as windowed. The first scan of a real machine offered a desktop pet and Docker Desktop: both were started from Claude Code sessions, and both were in use with no TCP connection. Protected processes such as `conhost.exe` don't count. This gives up headless browsers left by Playwright or Puppeteer, whose images are windowed.
+- **Timing and memory:** the M2 loop takes a snapshot every 5 s, and the grace period is 60 s, as in cc-reaper's proc-janitor. The family tree lives in memory only: after a restart, `CLAUDE_PID` and the rules cover what was learned. This gives up tracing strays born before Sweepling started.
+- **The rules file** is JSON with comments and `"version": 1`, read with source-generated System.Text.Json so it works under NativeAOT. An unknown version or key, or a rule with no pattern, is refused. Patterns are case-insensitive regular expressions, and `%NAME%` expands to that environment variable's path, matching either slash. The user's file is `%APPDATA%\Sweepling\rules.json`: its lists add to the shipped ones and its settings win. This gives up removing a shipped rule.
+- **`--scan` ignores the grace period** and prints every group as JSON, with command lines masked, so it works as a one-off check. A WinExe has no console of its own, so it attaches to the one it was started from unless output is redirected.
+- **Reading another process's environment is bounded by Sweepling's own buffer.** The size comes from the other process's memory, which that process controls. Found by an automated security review of the M1 code.
+- **Left to the builder,** to settle with tests and record here: the review window layout and the notification mechanism, with NativeAOT-compatible dependencies only; close order, and whether to try a gentle close first. The snapshot interval, grace period, rules file format, family tree persistence and untraced sessions were settled in M1, above.
 
 ## M0: Placeholder
 
@@ -74,16 +82,23 @@ Given up for them: features that need administrator rights, cross-platform suppo
 
 ## M1: Find leftovers
 
-- [ ] Process snapshot through Toolhelp32 and the family tree of each session.
-- [ ] Ended-or-running check for each session.
-- [ ] Established TCP connections for every process in a group.
-- [ ] The rules file, shipped and user, and the classifier.
-- [ ] A `--scan` flag that prints what it found as JSON and closes nothing.
+- [x] Process snapshot through Toolhelp32 and the family tree of each session.
+- [x] Ended-or-running check for each session.
+- [x] Established TCP connections for every process in a group.
+- [x] The rules file, shipped and user, and the classifier.
+- [x] A `--scan` flag that prints what it found as JSON and closes nothing.
 
 **Done when:** tests with synthetic process tables cover every rule: orphan, PID reuse, protect list, connections, grace period, ended vs running, and unknown treated as running. A real-process test, where a parent starts a child that listens on a port and then exits, must flag the child, and must not flag it while it has a connection.
 
+**Done on 2026-10-21:**
+
+- Synthetic process tables cover every rule in the Done line: orphan, PID reuse of a parent and of an agent, the protect list, connections, the grace period, ended and running, and unknown treated as running. They also cover the environment and command-line ties, strays that shared a parent, a live session under a stray, and windowed apps. Each rule's test was proven by breaking that rule in `Tracker.cs` or `rules.json` and watching the test fail.
+- The real-process test passes locally and on CI ([run 39653269155](https://github.com/hazeliscoding/sweepling/actions/runs/39653269155)). A PowerShell parent stands in for an agent: it starts a child that listens on a free port, then exits. The child is offered as a leftover of an ended, traced session, with its port and the `CLAUDE_PID` read from its environment. Once a client connects, it isn't offered.
+- `--scan` on the owner's machine, with 647 processes in the session, found 22 groups. Under Leftovers were `next dev` on port 3001, `npm start` and `ng serve` on port 4300, a scratchpad `sh` script, and 8 watcher halves. Under Session still running were 10 watcher halves, which can't be told apart from a live session, and the `vctip.exe` a NativeAOT publish had just left. Every leftover the planning scan found was there, except one `tail` that had exited since. A scan took 160–300 ms, including start-up.
+
 ## M2: Review and close
 
+- [ ] A snapshot every 5 s that stays cheap: cache each process's image, command line and windowed flag by PID and start time, and read only new processes. A full snapshot took 160–300 ms with 647 processes.
 - [ ] Tray count and a notification when it rises.
 - [ ] Review window with the Leftovers and Session still running sections.
 - [ ] Closing a group, with the PID and start-time re-check right before each close.
@@ -114,6 +129,8 @@ A dogfooding log in `docs/dogfooding.md`, kept from M2 on: leftovers found, grou
 ## Later
 
 - Codex, once a Codex leftover shows up in the dogfooding log.
+- Tie Git Bash strays to their session through the session ID in Claude Code's temp paths, matched against the `CLAUDE_CODE_SESSION_ID` of a live session's native children, so ended-session watchers move to Leftovers.
+- Headless browsers left by Playwright or Puppeteer, which the windowed-app rule keeps out today.
 - Cursor and other agents.
 - The Claude desktop app.
 - A winget package.
