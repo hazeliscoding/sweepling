@@ -21,7 +21,8 @@ public static unsafe class ProcessDetails
     /// <summary>Its private bytes: the memory only it holds.</summary>
     public static long? PrivateBytes(Proc process)
     {
-        var handle = PInvoke.OpenProcess(PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION, false, (uint)process.Pid);
+        // GetProcessMemoryInfo needs PROCESS_VM_READ as well, as its documentation says; Windows Server enforces it.
+        var handle = PInvoke.OpenProcess(PROCESS_ACCESS_RIGHTS.PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_ACCESS_RIGHTS.PROCESS_VM_READ, false, (uint)process.Pid);
         if (handle.IsNull)
         {
             return null;

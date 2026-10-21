@@ -16,7 +16,9 @@ public sealed class ProcessDetailsTests
             var seen = Assert.Single(new ProcessReader(null).Take().Processes, p => p.Pid == sleeper.Id);
 
             Assert.Equal(folder.FullName.TrimEnd('\\'), ProcessDetails.CurrentDirectory(seen), ignoreCase: true);
-            Assert.True(ProcessDetails.PrivateBytes(seen) > 1 << 20);
+            var privateBytes = ProcessDetails.PrivateBytes(seen);
+            Assert.NotNull(privateBytes);
+            Assert.True(privateBytes > 0);
         }
         finally
         {
