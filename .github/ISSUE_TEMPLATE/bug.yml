@@ -1,0 +1,40 @@
+name: Bug
+description: Sweepling did something wrong, such as crashing, showing the wrong thing, or failing to close a group.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If Sweepling offered a process that was still in use, use "A leftover I've seen" instead. Remove anything private before you post: tokens, keys, user names and folder paths.
+  - type: textarea
+    id: happened
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen again
+      placeholder: |
+        1. ...
+        2. ...
+  - type: textarea
+    id: log
+    attributes:
+      label: Lines from the closed log, if a close went wrong
+      description: From %APPDATA%\Sweepling\closed.log. Command lines there are already shortened and masked, but check them for anything private.
+      render: text
+  - type: input
+    id: versions
+    attributes:
+      label: Sweepling and Windows versions
+      placeholder: Sweepling 0.1.0, Windows 11 24H2
+    validations:
+      required: true

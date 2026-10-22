@@ -1,0 +1,50 @@
+name: A leftover I've seen
+description: A process a Claude Code session left running, whether Sweepling offered it or not.
+labels: [leftover]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Leftovers you've met are how Sweepling learns new ones. Remove anything private before you post: tokens, keys, user names and folder paths.
+  - type: dropdown
+    id: offered
+    attributes:
+      label: What did Sweepling do with it?
+      options:
+        - Didn't offer it
+        - Offered it under Leftovers
+        - Offered it under Session still running
+        - Offered it, but it was still in use
+        - I wasn't running Sweepling
+    validations:
+      required: true
+  - type: input
+    id: process
+    attributes:
+      label: The process
+      description: Its executable, and what it was, if you know.
+      placeholder: node.exe, a Vite dev server
+    validations:
+      required: true
+  - type: textarea
+    id: command-line
+    attributes:
+      label: Its command line, with anything private removed
+      render: text
+  - type: textarea
+    id: started
+    attributes:
+      label: What started it
+      description: The task you gave Claude Code, roughly, and whether that session had ended.
+    validations:
+      required: true
+  - type: textarea
+    id: noticed
+    attributes:
+      label: How you noticed
+      description: A port in use, memory, Task Manager, or something else.
+  - type: input
+    id: versions
+    attributes:
+      label: Windows and Claude Code versions
+      placeholder: Windows 11 24H2, Claude Code 2.1
