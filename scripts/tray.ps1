@@ -25,11 +25,18 @@ function Overflow {
     }
     $ov
 }
+# The icon is on the taskbar itself once it's pinned there, and in the hidden-icons overflow until then.
+function Place {
+    $tray = $root.FindFirst($S::Children, (New-Object $P($A::ClassNameProperty, 'Shell_TrayWnd')))
+    $buttons = Buttons $tray
+    if (-not ($buttons | Where-Object { $_.Current.Name -match '^Sweepling' })) { $buttons = Buttons (Overflow) }
+    $buttons
+}
 function Window { $root.FindFirst($S::Children, (New-Object System.Windows.Automation.AndCondition((New-Object $P($A::ProcessIdProperty, $sweep.Id)), (New-Object $P($A::NameProperty, 'Sweepling'))))) }
 
 switch ($Action) {
     'open' {
-        $icon = @(Buttons (Overflow) | Where-Object { $_.Current.Name -match '^Sweepling' })
+        $icon = @(Place | Where-Object { $_.Current.Name -match '^Sweepling' })
         if ($icon.Count -ne 1) { 'STOP: Sweepling icon not found once'; exit 1 }
         $icon[0].GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
         Start-Sleep -Milliseconds 2500
@@ -51,7 +58,7 @@ switch ($Action) {
     'quit' {
         # Right-click the icon at a point only it covers, then choose the menu's last item, Quit Sweepling, by
         # posting keys to the menu's own window: UI Automation lists no items in a Win32 tray menu.
-        $buttons = Buttons (Overflow)
+        $buttons = @(Place)
         $icon = @($buttons | Where-Object { $_.Current.Name -match '^Sweepling' })
         if ($icon.Count -ne 1) { 'STOP: Sweepling icon not found once'; exit 1 }
         $b = $icon[0].Current.BoundingRectangle; $x = [int]($b.X + $b.Width / 2); $y = [int]($b.Y + $b.Height / 2)
