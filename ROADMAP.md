@@ -75,6 +75,11 @@ Given up for them: features that need administrator rights, cross-platform suppo
   | With Primrose, 120 s after close | 46.8 MB | 16.6 MB | 13.3 MB |
 
   The differences are within the noise between runs. Prompuff wasn't read again; against M2's reading of it, the ceiling still holds on every counter.
+- **Velopack installs Sweepling per user, with a Start menu shortcut and no portable copy.** A copy that can't update itself or start at login would miss fixes and miss leftovers. This gives up a zip for people who won't run an installer.
+- **The close log moved to `%APPDATA%\Sweepling\closed.log`, beside the user's rules file.** Velopack installs into `%LOCALAPPDATA%\Sweepling` and deletes that folder on uninstall, so the log would have gone with it; a Setup run into a folder that already holds files is a risk too. The owner's log was moved by hand. This gives up keeping a log about one machine out of a roaming profile.
+- **Start at login and Update automatically are ticks in the tray menu**, kept in the registry: Sweepling's value under the user's Run key, and `HKCU\Software\Sweepling`. Installing turns login start on; uninstalling removes both. A build run from source shows neither and never checks for updates. This gives up a settings window, which two switches don't need.
+- **The first update check is a minute after start, then every 4 hours.** A downloaded update waits while the review window is open and restarts Sweepling as soon as it closes, through Velopack's updater, which waits for Sweepling to exit so the tray icon goes cleanly. If the updater can't start, the update installs at the next start. Offline, a check fails quietly and the next one tries again.
+- **What updates cost.** Velopack and the HTTP stack it brings grew the exe from 19.9 to 25.6 MB. An installed copy that has checked GitHub idles at 40.5 MB working set, 16.6 MB private bytes and 13.4 MB private working set, with 7 threads, about 3 MB of private bytes above a build from source. Prompuff wasn't read again; against M2's reading of it, the ceiling holds on every counter.
 - **The logo is Primrose's hand brush, option 2B2.** Pebble's round critter clashed with Primrose's style, so the logo moved into hers: heavy ink outlines and flat fills. It was picked on the claude.ai design canvas "Sweepling logo" from three broom takes (her bell bob, her hand brush, a mug and broom) and three refinements of the brush. It is her straw hand brush with a pistachio handle like her shirt, and an ink-green band with a straw stripe like her trousers and belt. In the tray it stands upright with the count badge clear of its bristles, and lies down when there is nothing to sweep. It had the cleanest 16 px silhouette of the takes. This gives up a face on the tray icon, closed eyes as the idle state, and the mint of the old mascot.
 
 ## M0: Placeholder
@@ -166,6 +171,10 @@ Given up for them: features that need administrator rights, cross-platform suppo
   - [ ] the issue tracker is ready for reports.
 
 **Done when:** an installed release updates itself to a later test release without leaving a Sweepling process behind, Setup and `Sweepling.exe` carry a valid signature, and every gate above is ticked.
+
+**So far, on 2026-10-22.**
+- Velopack, start at login and automatic updates are in, and the NativeAOT publish stays free of trim and AOT warnings. `release.yml` builds, packs and drafts a release; it signs once the repo's `release` environment exists.
+- A local, unsigned run: version 0.1.0, installed from a scratch feed, found 0.1.1 a minute after it started and was running it 4 s later as a single Sweepling, with Velopack's updater gone. Uninstalling removed the install folder, the login start, the Start menu shortcut and the uninstall entry, and left the close log.
 
 ## How we'll know it works
 
