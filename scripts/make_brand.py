@@ -21,16 +21,18 @@ out = Path(sys.argv[2])
 out.mkdir(parents=True, exist_ok=True)
 
 INK = "#17312E"
-MINT = "#BDE7DA"
 STRAW = "#E9B949"
-BLUSH = "#F2A69B"
-HANDLE_DARK = "#E7D7B5"
-# The taskbar can be light or dark; this brown keeps 3:1 against both, so one tray icon serves.
-HANDLE_TRAY = "#B07A3B"
+STRAW_SHADE = "#C99A2E"
+PISTACHIO = "#DCECC4"
+GREEN = "#244838"
 WORD = INK
 WORD_DARK = "#E6F2EE"
 
-BROOM_AT, BROOM_TURN = (50, 36), -15
+# Poses in the 64-unit box: (position, turn, scale). Upright there is work to do; lying down, nothing to
+# sweep. Upright, the bristles lean left, so the count badge in the top right stays clear of them.
+UPRIGHT = ((29, 38), -28, 1.15)
+LYING = ((32, 45), -80, 1.08)
+FAN_CENTRE, FAN_OUT, FAN_IN, FAN_FROM, FAN_SPAN, FAN_TEETH = (0, 8), 31, 27.5, -118, 56, 12
 
 
 def n(v: float) -> str:
@@ -38,43 +40,55 @@ def n(v: float) -> str:
     return "0" if t in ("-0", "") else t
 
 
-def pebble(handle: str, transform: str = "", asleep: bool = False) -> str:
-    """Option 1A, drawn in a 64-unit box. Asleep, its eyes are closed: nothing to sweep."""
+def fan_points() -> list[tuple[float, float]]:
+    """The bristles' outline, from the band up to a zigzag-cut top and back."""
+    cx, cy = FAN_CENTRE
+    tips = []
+    for i in range(FAN_TEETH + 1):
+        a = math.radians(FAN_FROM + i * FAN_SPAN / FAN_TEETH)
+        r = FAN_OUT if i % 2 == 0 else FAN_IN
+        tips.append((cx + r * math.cos(a), cy + r * math.sin(a)))
+    return [(-5.5, -0.5), *tips, (5.5, -0.5)]
+
+
+def brush(transform: str = "", asleep: bool = False) -> str:
+    """Option 2B2, Primrose's straw hand brush in her colors, drawn in a 64-unit box."""
+    (x, y), turn, scale = LYING if asleep else UPRIGHT
     attr = f' transform="{transform}"' if transform else ""
-    eyes = (
-        f'<path d="M19.4 35.6Q22 38.2 24.6 35.6M29.4 35.6Q32 38.2 34.6 35.6" fill="none" stroke="{INK}" stroke-width="2" stroke-linecap="round"/>'
-        if asleep
-        else f'<circle cx="22" cy="36" r="2.4" fill="{INK}"/><circle cx="32" cy="36" r="2.4" fill="{INK}"/>'
+    fan = "M" + "L".join(f"{n(px)} {n(py)}" for px, py in fan_points()) + "Z"
+    cx, cy = FAN_CENTRE
+
+    def along(angle: float, r: float) -> str:
+        a = math.radians(angle)
+        return f"{n(cx + r * math.cos(a))} {n(cy + r * math.sin(a))}"
+
+    bristles = "".join(
+        f'<path d="M{along(a, 8)}L{along(a, 23)}" stroke="{STRAW_SHADE}" stroke-width="1.6" stroke-linecap="round"/>' for a in (-106, -90, -74)
     )
     return (
         f"<g{attr}>"
-        f'<g transform="translate({BROOM_AT[0]} {BROOM_AT[1]}) rotate({BROOM_TURN})">'
-        f'<line x1="0" y1="-22" x2="0" y2="5" stroke="{handle}" stroke-width="3" stroke-linecap="round"/>'
-        f'<path d="M-5 5H5L7.5 16H-7.5Z" fill="{STRAW}" stroke="{INK}" stroke-width="2.5" stroke-linejoin="round"/>'
-        f'<line x1="-5.5" y1="8.5" x2="5.5" y2="8.5" stroke="{INK}" stroke-width="2"/>'
-        "</g>"
-        f'<circle cx="27" cy="38" r="19" fill="{MINT}" stroke="{INK}" stroke-width="3"/>'
-        + eyes
-        + f'<path d="M25 40.5Q27 42.5 29 40.5" fill="none" stroke="{INK}" stroke-width="1.8" stroke-linecap="round"/>'
-        f'<ellipse cx="17.5" cy="42" rx="2.6" ry="1.6" fill="{BLUSH}"/>'
-        f'<ellipse cx="36.5" cy="42" rx="2.6" ry="1.6" fill="{BLUSH}"/>'
-        f'<circle cx="48.5" cy="39" r="3.6" fill="{MINT}" stroke="{INK}" stroke-width="2.5"/>'
-        "</g>"
+        f'<g transform="translate({n(x)} {n(y)}) rotate({n(turn)}) scale({n(scale)})">'
+        f'<rect x="-3.8" y="4" width="7.6" height="19" rx="3.8" fill="{PISTACHIO}" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="{fan}" fill="{STRAW}" stroke="{INK}" stroke-width="2.8" stroke-linejoin="round"/>'
+        + bristles
+        + f'<rect x="-6.5" y="-1.5" width="13" height="6.5" rx="2" fill="{GREEN}" stroke="{INK}" stroke-width="2.5"/>'
+        f'<path d="M-5.2 1.75H5.2" stroke="{STRAW}" stroke-width="1.8"/>'
+        "</g></g>"
     )
 
 
-def ink_bounds() -> tuple[float, float, float, float]:
+def ink_bounds(asleep: bool = False) -> tuple[float, float, float, float]:
     """Bounds of the drawn ink, strokes included, in the 64-unit box."""
-    boxes = [(27, 38, 19 + 1.5), (48.5, 39, 3.6 + 1.25)]  # body and paw: centre, radius
-    a = math.radians(BROOM_TURN)
-
-    def place(x: float, y: float) -> tuple[float, float]:
-        return (BROOM_AT[0] + x * math.cos(a) - y * math.sin(a), BROOM_AT[1] + x * math.sin(a) + y * math.cos(a))
-
-    # Broom points with the half-width of the stroke drawn through them.
-    for x, y, half in [(0, -22, 1.5), (0, 5, 1.5), (-5, 5, 1.25), (5, 5, 1.25), (7.5, 16, 1.25), (-7.5, 16, 1.25)]:
-        px, py = place(x, y)
-        boxes.append((px, py, half))
+    (tx, ty), turn, scale = LYING if asleep else UPRIGHT
+    a = math.radians(turn)
+    # Points with the half-width of the stroke, or the round end, drawn around them.
+    marks = [(px, py, 1.4) for px, py in fan_points()]
+    marks += [(0, 7.8, 3.8 + 1.25), (0, 19.2, 3.8 + 1.25)]  # the handle's round ends
+    marks += [(sx, sy, 1.25) for sx in (-6.5, 6.5) for sy in (-1.5, 5)]  # the band's corners
+    boxes = [
+        (tx + scale * (px * math.cos(a) - py * math.sin(a)), ty + scale * (px * math.sin(a) + py * math.cos(a)), half * scale)
+        for px, py, half in marks
+    ]
     return (
         min(cx - r for cx, _, r in boxes),
         min(cy - r for _, cy, r in boxes),
@@ -96,16 +110,16 @@ bx0, by0, bx1, by1 = ink_bounds()
 bw, bh = bx1 - bx0, by1 - by0
 print(f"mark ink x {bx0:.2f}..{bx1:.2f} y {by0:.2f}..{by1:.2f} ({bw:.2f} x {bh:.2f})")
 
-# --- mark.svg / mark-dark.svg: tight viewBox with a little padding ------------------
+# --- mark.svg: tight viewBox with a little padding. The pistachio handle and straw bristles read on a
+# dark background as well, so the mark has no dark variant. ---------------------------------------
 pad = 1.0
 vb = (bx0 - pad, by0 - pad, bw + 2 * pad, bh + 2 * pad)
-for name, handle in (("mark.svg", INK), ("mark-dark.svg", HANDLE_DARK)):
-    (out / name).write_text(svg(vb[2], vb[3], pebble(handle), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
+(out / "mark.svg").write_text(svg(vb[2], vb[3], brush(), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
 
-# --- tray.svg: square and tight, so the mascot fills a 16 px tray icon (source of sweepling.ico) ---
+# --- tray.svg: square and tight, so the brush fills a 16 px icon (source of sweepling.ico) ---------
 side = max(bw, bh) + 2 * pad
 vb = (bx0 + bw / 2 - side / 2, by0 + bh / 2 - side / 2, side, side)
-(out / "tray.svg").write_text(svg(side, side, pebble(HANDLE_TRAY), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
+(out / "tray.svg").write_text(svg(side, side, brush(), "Sweepling", vb=vb, px_scale=4), encoding="utf-8", newline="\n")
 
 # --- lockups: the mark plus "sweepling" in Fredoka SemiBold, outlined ----------------
 font = TTFont(font_path)
@@ -158,24 +172,27 @@ W, H = x1 - x0, y1 - y0
 print(f"lockup: mark {mark_w:.1f}x{mark_h:.1f} gap {gap:.1f} word ink {wx0:.1f}..{wx1:.1f} / {wy0:.1f}..{wy1:.1f}; size {W:.1f}x{H:.1f}")
 
 word_d = " ".join(p for p in parts if p)
-for name, handle, color in (("lockup.svg", INK, WORD), ("lockup-dark.svg", HANDLE_DARK, WORD_DARK)):
+for name, color in (("lockup.svg", WORD), ("lockup-dark.svg", WORD_DARK)):
     body = (
         f'<g transform="translate({n(-x0)} {n(-y0)})">'
-        + pebble(handle, f"translate({n(mx)} {n(my)}) scale({m:.5f})")
+        + brush(f"translate({n(mx)} {n(my)}) scale({m:.5f})")
         + f'<path d="{word_d}" fill="{color}"/>'
         + "</g>"
     )
     (out / name).write_text(svg(W, H, body, "Sweepling"), encoding="utf-8", newline="\n")
 
-# --- tray states: asleep with nothing to sweep, awake with a count badge, 1 to 9 then 9+ ----------
+# --- tray states: lying down with nothing to sweep, upright with a count badge, 1 to 9 then 9+ -----
+# Every state uses the whole 64-unit box, which holds both poses, so the brush doesn't jump between
+# them. The badge sits in its top right, 1.3 units clear of the upright bristles.
 BADGE = "#C2410C"
 tray = out / "tray"
 tray.mkdir(exist_ok=True)
-side = max(bw, bh) + 2 * pad
-vx, vy = bx0 + bw / 2 - side / 2, by0 + bh / 2 - side / 2
-tray_vb = (vx, vy, side, side)
-r = side * 0.25
-cx, cy = vx + side - r, vy + r
+lx0, ly0, lx1, ly1 = ink_bounds(asleep=True)
+assert min(bx0, lx0) >= 0 and min(by0, ly0) >= 0 and max(bx1, lx1) <= 64 and max(by1, ly1) <= 64, "a pose leaves the box"
+side = 64.0
+tray_vb = (0, 0, side, side)
+r = 12.5
+cx, cy = 50.0, 14.5
 
 
 def badge(label: str) -> str:
@@ -204,10 +221,10 @@ def badge(label: str) -> str:
     )
 
 
-(tray / "tray-0.svg").write_text(svg(side, side, pebble(HANDLE_TRAY, asleep=True), "Sweepling", vb=tray_vb, px_scale=4), encoding="utf-8", newline="\n")
+(tray / "tray-0.svg").write_text(svg(side, side, brush(asleep=True), "Sweepling", vb=tray_vb, px_scale=4), encoding="utf-8", newline="\n")
 for count in range(1, 11):
     label = str(count) if count < 10 else "9+"
     name = f"tray-{count}.svg" if count < 10 else "tray-many.svg"
-    (tray / name).write_text(svg(side, side, pebble(HANDLE_TRAY) + badge(label), "Sweepling", vb=tray_vb, px_scale=4), encoding="utf-8", newline="\n")
+    (tray / name).write_text(svg(side, side, brush() + badge(label), "Sweepling", vb=tray_vb, px_scale=4), encoding="utf-8", newline="\n")
 
 print("wrote", sorted(p.name for p in out.glob("*.svg")), "and", len(list(tray.glob("*.svg"))), "tray states")
