@@ -80,6 +80,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - **Start at login and Update automatically are ticks in the tray menu**, kept in the registry: Sweepling's value under the user's Run key, and `HKCU\Software\Sweepling`. Installing turns login start on; uninstalling removes both. A build run from source shows neither and never checks for updates. This gives up a settings window, which two switches don't need.
 - **The first update check is a minute after start, then every 4 hours.** A downloaded update waits while the review window is open and restarts Sweepling as soon as it closes, through Velopack's updater, which waits for Sweepling to exit so the tray icon goes cleanly. If the updater can't start, the update installs at the next start. Offline, a check fails quietly and the next one tries again.
 - **What updates cost.** Velopack and the HTTP stack it brings grew the exe from 19.9 to 25.6 MB. An installed copy that has checked GitHub idles at 40.5 MB working set, 16.6 MB private bytes and 13.4 MB private working set, with 7 threads, about 3 MB of private bytes above a build from source. Prompuff wasn't read again; against M2's reading of it, the ceiling holds on every counter.
+- **README screenshots are rendered from made-up leftovers**, by `tools/Sweepling.Screenshots` through Avalonia's headless platform with Skia. A screenshot of the real window shows the owner's real folders and projects, and covering them by hand is easy to get wrong. The tool also makes the same pictures every time, in light and dark. This gives up the real window frame in the pictures, and adds `Avalonia.Headless`, a package of the framework already in use, to a tool that never ships.
 - **The logo is Primrose's hand brush, option 2B2.** Pebble's round critter clashed with Primrose's style, so the logo moved into hers: heavy ink outlines and flat fills. It was picked on the claude.ai design canvas "Sweepling logo" from three broom takes (her bell bob, her hand brush, a mug and broom) and three refinements of the brush. It is her straw hand brush with a pistachio handle like her shirt, and an ink-green band with a straw stripe like her trousers and belt. In the tray it stands upright with the count badge clear of its bristles, and lies down when there is nothing to sweep. It had the cleanest 16 px silhouette of the takes. This gives up a face on the tray icon, closed eyes as the idle state, and the mint of the old mascot.
 
 ## M0: Placeholder
@@ -159,7 +160,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
 ## M3: Release
 
 - [ ] Signed Velopack installer with automatic updates, and start at login.
-- [ ] README: install steps, a screenshot, and the comparison with today's alternatives checked again.
+- [x] README: install steps, a screenshot, and the comparison with today's alternatives checked again.
 - [x] `CONTRIBUTING.md` and `SECURITY.md`.
 - [ ] The OSS launch gates:
   - [ ] the core journey works end to end: notice, review, close;
@@ -176,6 +177,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - Velopack, start at login and automatic updates are in, and the NativeAOT publish stays free of trim and AOT warnings. `release.yml` builds, packs and drafts a release. A manual run built Setup unsigned and skipped the release job.
 - Signing is set up as for Gil Sweep, on the shared Artifact Signing account and profile: the app registration `sweepling-release-signing` with no secrets or certificates, a federated credential for the `release` environment by the repo's numeric IDs, one role grant scoped to the profile, the `release` environment open only to `v*` tags with its six variables, and a ruleset that stops `v*` tags being moved or deleted. Nothing has been signed yet: that waits for the first tag.
 - `CONTRIBUTING.md` and `SECURITY.md` are in, and GitHub's private vulnerability reporting is on, which `SECURITY.md` points to.
+- The README has install steps and a screenshot of the review window, light and dark. The comparison was checked again on 2026-10-22: cc-reaper now has an optional hourly reaper that can stop a dev server serving nobody, report-only by default, so its row says so.
 - A local, unsigned run: version 0.1.0, installed from a scratch feed, found 0.1.1 a minute after it started and was running it 4 s later as a single Sweepling, with Velopack's updater gone. Uninstalling removed the install folder, the login start, the Start menu shortcut and the uninstall entry, and left the close log.
 
 ## How we'll know it works
