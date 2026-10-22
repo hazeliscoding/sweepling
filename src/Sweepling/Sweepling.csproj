@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="..\..\docs\brand\sweepling.ico" Link="Assets\sweepling.ico" />
+    <AvaloniaResource Include="..\..\docs\brand\primrose\lights-out-256.png" Link="Assets\primrose-lights-out.png" />
     <EmbeddedResource Include="Leftovers\rules.json" LogicalName="Sweepling.rules.json" />
     <EmbeddedResource Include="Assets\Tray\*.ico" LogicalName="Sweepling.Tray.%(Filename).ico" />
   </ItemGroup>

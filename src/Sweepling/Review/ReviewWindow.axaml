@@ -75,9 +75,14 @@
           <ItemsControl ItemsSource="{Binding StillRunning}" ItemTemplate="{StaticResource GroupTemplate}" />
         </StackPanel>
 
-        <TextBlock IsVisible="{Binding IsEmpty}" Margin="0,24,0,0" FontSize="14" TextWrapping="Wrap"
-                   Foreground="{DynamicResource TextMutedBrush}"
-                   Text="Nothing to sweep. Sweepling looks again every 5 seconds." />
+        <StackPanel IsVisible="{Binding IsEmpty}" Margin="0,24,0,0" Spacing="12" HorizontalAlignment="Center">
+          <Image Source="/Assets/primrose-lights-out.png" Width="128" Height="128"
+                 RenderOptions.BitmapInterpolationMode="HighQuality"
+                 AutomationProperties.AccessibilityView="Raw" />
+          <TextBlock FontSize="14" TextWrapping="Wrap" TextAlignment="Center"
+                     Foreground="{DynamicResource TextMutedBrush}"
+                     Text="Nothing to sweep. Sweepling looks again every 5 seconds." />
+        </StackPanel>
       </StackPanel>
     </ScrollViewer>
   </DockPanel>
