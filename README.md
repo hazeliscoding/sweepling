@@ -19,6 +19,13 @@ A Claude Code session starts dev servers, file watchers and little scripts. When
 
 **After.** Sweepling sits in the tray and counts the leftovers of sessions that have ended. Its window says what each one is in words, with its project folder, age, port and memory. You close a whole group with one click, and Sweepling re-checks every process right before it closes it.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/review-dark.png">
+    <img width="420" src="docs/screenshots/review-light.png" alt="Sweepling's review window: three ticked leftovers (a Next.js dev server, a Vite dev server and a task output watcher, each with its folder, age, port and memory), an Angular dev server under Session still running left unticked, and a Close 3 groups button.">
+  </picture>
+</p>
+
 ## What it does
 
 <img align="right" width="180" src="docs/brand/primrose/close-these.png" alt="Primrose, a café owner with a blonde bob, holds up a finger and a tray as she asks whether to clear a table.">
@@ -65,24 +72,34 @@ flowchart TD
     ended -- no --> running["Session still running<br/>never ticked by default"]
 ```
 
+## Install
+
+You need Windows 10 or 11 on x64; Sweepling is tested on Windows 11, and Arm64 PCs run it under emulation.
+
+1. Download `sweepling-setup-win-x64.exe` from the [latest release](https://github.com/hazeliscoding/sweepling/releases/latest).
+2. Run it. It installs for your user only and needs no administrator rights. While a release is new, Windows may say "Windows protected your PC": check that the publisher is Hazel Granados, then choose **More info** and **Run anyway**.
+3. Sweepling starts in the tray as a straw brush. When the brush shows a count, click it, untick anything you still want, and press **Close**.
+
+Sweepling starts when you sign in and keeps itself up to date; right-click the brush to turn either off. To check a download, compare `(Get-FileHash .\sweepling-setup-win-x64.exe).Hash` with its line in the release's `SHA256SUMS`. To remove it, use **Settings > Apps > Installed apps**: that also removes its login start and settings, and leaves your close log and rules in `%APPDATA%\Sweepling`.
+
 ## Status
 
 <img align="right" width="150" src="docs/brand/primrose/lights-out.png" alt="Primrose dozes with her cheek on her hands, as Sweepling does when there is nothing to sweep.">
 
-**In development.** There is nothing to install yet. A build from source runs the tray app: it counts leftovers, notifies you when more appear, and closes the groups you tick. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. The installer comes with the release milestone. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
+**In development.** The first release comes after the owner's week of dogfooding, so until then there is nothing to download and the steps above don't work yet. A build from source runs the tray app: it counts leftovers, notifies you when more appear, and closes the groups you tick. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
 
 <br clear="right">
 
 ## Alternatives
 
-Checked against their own docs on 2026-10-21.
+Checked against their own docs on 2026-10-22.
 
 | | Sweepling (planned) | [cc-reaper](https://github.com/theQuert/cc-reaper) | [kill-port](https://github.com/tiaanduplessis/kill-port) or hand-written commands |
 |---|---|---|---|
 | Platforms | Windows | macOS and Linux | Any |
 | Finds | Each Claude Code session's family tree, plus command-line rules | Orphans in a Claude CLI session's process group, plus command patterns | Whatever holds the port or PID you name |
 | Closes | Only a group you confirm | Automatically, from a Stop hook and a daemon that scans every 30 s; its macOS menu bar app asks first | Immediately |
-| Dev servers | Offered when orphaned and idle | Protected, never killed | Killed if they hold the port |
+| Dev servers | Offered when orphaned and idle | Protected from its cleanup; an optional hourly reaper can stop one that serves nobody, and only lists them by default | Killed if they hold the port |
 | Agents | Claude Code CLI | Claude Code and Codex | Not agent-aware |
 | Also does | Nothing else | Disk, worktree and session cleanup, CPU and memory diagnostics | Nothing else |
 
