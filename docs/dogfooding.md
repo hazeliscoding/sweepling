@@ -1,6 +1,6 @@
 # Dogfooding log
 
-How we'll know Sweepling works: what it found on the owner's machine, which groups were closed, and anything it offered that was still in use. That last count must stay zero. Sweepling keeps its own record of every close in `%LOCALAPPDATA%\Sweepling\closed.log`; this log is the summary, written by hand.
+How we'll know Sweepling works: what it found on the owner's machine, which groups were closed, and anything it offered that was still in use. That last count must stay zero. Sweepling keeps its own record of every close in `%APPDATA%\Sweepling\closed.log`; this log is the summary, written by hand.
 
 Entries name the kind of process and the project, never command lines, tokens or private paths.
 

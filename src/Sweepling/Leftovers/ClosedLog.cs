@@ -35,8 +35,9 @@ public sealed class ClosedLog(string path, string? userProfile)
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     });
 
+    // Beside the user's rules file. The installed app lives in %LOCALAPPDATA%\Sweepling, which uninstalling deletes.
     public static string DefaultPath { get; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Sweepling", "closed.log");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sweepling", "closed.log");
 
     public void Write(DateTimeOffset when, Group group, string what, string? folder, IReadOnlyList<CloseResult> results)
     {
