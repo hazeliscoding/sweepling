@@ -5,4 +5,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Sweepling.Tests/Sweepling.Tests.csproj" />
   </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Sweepling.Screenshots/Sweepling.Screenshots.csproj" />
+  </Folder>
 </Solution>
