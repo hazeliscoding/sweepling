@@ -22,7 +22,7 @@ A Claude Code session starts dev servers, file watchers and little scripts. When
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/review-dark.png">
-    <img width="420" src="docs/screenshots/review-light.png" alt="Sweepling's review window: three ticked leftovers (a Next.js dev server, a Vite dev server and a task output watcher, each with its folder, age, port and memory), an Angular dev server under Session still running left unticked, and a Close 3 groups button.">
+    <img width="480" src="docs/screenshots/review-light.png" alt="Sweepling's review window: three ticked leftovers (a Next.js dev server, a Vite dev server and a task output watcher, each with its folder, age, port and memory), an Angular dev server under Session still running left unticked, and a Close 3 groups button.">
   </picture>
 </p>
 
