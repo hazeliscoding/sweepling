@@ -21,12 +21,16 @@ A Claude Code session starts dev servers, file watchers and little scripts. When
 
 ## What it does
 
+<img align="right" width="180" src="docs/brand/primrose/close-these.png" alt="Primrose, a café owner with a blonde bob, holds up a finger and a tray as she asks whether to clear a table.">
+
 - Every few seconds it takes a snapshot of your processes and keeps a family tree for each Claude Code session.
 - It offers a process only when its parent has been gone for a while, it belongs to a Claude Code session, nothing in its group has an open TCP connection or is a windowed app, and it isn't on the protect list.
 - Strays of a session that is still running are shown in their own section, never ticked.
 - It sees only your own processes and never asks for administrator rights.
 
 **The promise:** Sweepling never closes anything you haven't confirmed, and it doesn't offer anything that still looks in use. When it can't tell whether a session has ended, it treats the session as running.
+
+<br clear="right">
 
 ```mermaid
 flowchart LR
@@ -63,7 +67,11 @@ flowchart TD
 
 ## Status
 
+<img align="right" width="150" src="docs/brand/primrose/lights-out.png" alt="Primrose dozes with her cheek on her hands, as Sweepling does when there is nothing to sweep.">
+
 **In development.** There is nothing to install yet. A build from source runs the tray app: it counts leftovers, notifies you when more appear, and closes the groups you tick. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. The installer comes with the release milestone. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
+
+<br clear="right">
 
 ## Alternatives
 
@@ -86,4 +94,4 @@ It's early, so code contributions open with the release milestone. Until then, i
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE). Sweepling is an independent project, not affiliated with or endorsed by Anthropic.
+Apache-2.0. See [LICENSE](LICENSE). Primrose, the café owner in this README, was drawn with an AI image model and is Apache-2.0 like the code. Sweepling is an independent project, not affiliated with or endorsed by Anthropic.
