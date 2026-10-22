@@ -173,7 +173,8 @@ Given up for them: features that need administrator rights, cross-platform suppo
 **Done when:** an installed release updates itself to a later test release without leaving a Sweepling process behind, Setup and `Sweepling.exe` carry a valid signature, and every gate above is ticked.
 
 **So far, on 2026-10-22.**
-- Velopack, start at login and automatic updates are in, and the NativeAOT publish stays free of trim and AOT warnings. `release.yml` builds, packs and drafts a release; it signs once the repo's `release` environment exists.
+- Velopack, start at login and automatic updates are in, and the NativeAOT publish stays free of trim and AOT warnings. `release.yml` builds, packs and drafts a release. A manual run built Setup unsigned and skipped the release job.
+- Signing is set up as for Gil Sweep, on the shared Artifact Signing account and profile: the app registration `sweepling-release-signing` with no secrets or certificates, a federated credential for the `release` environment by the repo's numeric IDs, one role grant scoped to the profile, the `release` environment open only to `v*` tags with its six variables, and a ruleset that stops `v*` tags being moved or deleted. Nothing has been signed yet: that waits for the first tag.
 - A local, unsigned run: version 0.1.0, installed from a scratch feed, found 0.1.1 a minute after it started and was running it 4 s later as a single Sweepling, with Velopack's updater gone. Uninstalling removed the install folder, the login start, the Start menu shortcut and the uninstall entry, and left the close log.
 
 ## How we'll know it works
