@@ -51,6 +51,7 @@ One meaning per term. Code, docs, UI copy and agents use these words and no syno
 ## Brand
 
 - The assets are in `docs/brand/`. `-dark` files are for dark backgrounds.
+- Pebble is the logo and the tray icon. Primrose, in `docs/brand/primrose/`, is the character. Never edit, recolor or redraw her here: her stickers come from one written spec and one reference image, and a sticker changed by hand drifts from the rest of the set. Keep `still-sipping.png` off dark backgrounds until its see-through gap is fixed, because the gap shows as a dark speck.
 - The wordmark is outlined Fredoka SemiBold. Use the SVGs; don't re-typeset it with a web font. `scripts/make_brand.py` regenerates them.
 - UI colors come from the tokens in `docs/brand/README.md`. Every text pair there passes WCAG AA; a new text or focus color on a surface needs its pair checked before it ships. Mascot colors are never text colors.
 
