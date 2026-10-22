@@ -7,3 +7,4 @@ Entries name the kind of process and the project, never command lines, tokens or
 | Date | Leftovers offered | Groups closed | Offered but still in use | Notes |
 |---|---|---|---|---|
 | 2026-10-21 | 11 to 12 | 2 | 0 | First run of the M2 build. Only two fake dev servers, started for the test, were closed; the real leftovers were left for the owner to close. |
+| 2026-10-22 | 21 | 0 | 0 | Installed the 0.0.1 build at midday, so it now starts at login. Nothing closed yet. The 21: 9 task output watchers, 9 watcher filters, a Next.js dev server on port 3001 (pdfcraft), an Angular dev server on port 4300 and a shell script, all from ended sessions. None reported in use. |
