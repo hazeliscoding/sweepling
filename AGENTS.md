@@ -70,6 +70,7 @@ One meaning per term. Code, docs, UI copy and agents use these words and no syno
   - Windows' notifications don't show up in UI Automation, so ask the owner whether one appeared.
 - Measure idle memory with the watch running for 75 s, then with the window open, then two minutes after it closes.
 - `dotnet run scripts/make-icons.cs` rebuilds `docs/brand/sweepling.ico` from `docs/brand/tray.svg`; `scripts/make_brand.py` regenerates the SVGs (see its header).
+- `dotnet run --project tools/Sweepling.Screenshots -- docs/screenshots` renders the README's review window screenshots, light and dark, from made-up leftovers, so no real process, folder or command line ends up in a picture. Re-render them after a change to the review window.
 - Releases: `.github/workflows/release.yml` builds, signs and drafts a release from a `v*` tag. Run it by hand to build unsigned. `dotnet tool restore` installs `vpk`, pinned in `dotnet-tools.json` to the Velopack package's version.
 - To try an update locally: publish, `dotnet vpk pack` versions 0.1.0 and then 0.1.1 into one scratch folder with the arguments `release.yml` uses, and keep a copy of the 0.1.0 Setup from before the second pack. Install it with `--silent`, then start `%LOCALAPPDATA%\Sweepling\current\Sweepling.exe` with `SWEEPLING_UPDATE_SOURCE` set to that folder: about a minute later it updates itself. `%LOCALAPPDATA%\Sweepling\Update.exe uninstall --silent` removes it, its login start and its settings. Quit the dogfooding copy first, since only one Sweepling runs at a time.
 

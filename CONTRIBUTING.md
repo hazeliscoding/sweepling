@@ -42,6 +42,7 @@ The publish is NativeAOT and needs Visual Studio's C++ workload. If linking fail
 | `src/Sweepling/Install` | Velopack, start at login, settings and updates. |
 | `src/Sweepling/Leftovers/rules.json` | Agent roots, command-line rules, the protect list and the grace period. |
 | `tests/Sweepling.Tests` | xUnit v3 tests, in the same folders. |
+| `tools/Sweepling.Screenshots` | Renders the README's screenshots from made-up leftovers. |
 | `scripts/` | The brand and icon generators, and `tray.ps1`, which drives the running app for hand tests. |
 
 Package versions live in `Directory.Packages.props`.
@@ -67,6 +68,7 @@ These come from [AGENTS.md](AGENTS.md), which gives the reason for each, and rev
 - Colors come from the tokens in [docs/brand/README.md](docs/brand/README.md). Every text pair there passes WCAG AA; check the pair of any new text or focus color.
 - Copy is calm, short and declarative, with no exclamation marks or emoji. Say what a process is in words ("Next.js dev server"), not just its executable, and give numbers units.
 - Primrose's art comes from one written spec; don't edit or redraw it here.
+- After a change to the review window, re-render the README's screenshots with `dotnet run --project tools/Sweepling.Screenshots -- docs/screenshots` and attach them to the pull request.
 
 ## Code style
 
