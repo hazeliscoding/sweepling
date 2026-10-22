@@ -27,6 +27,7 @@ Each rule has its reason, so it can be applied to cases it didn't foresee. When 
 - **NativeAOT-compatible dependencies only.** Low idle cost depends on a single NativeAOT process. Use source-generated System.Text.Json and compiled bindings; a reflection-based library breaks the publish or fails at run time after trimming. Trim and AOT warnings are errors.
 - **Stay under the idle ceiling.** Tray-only idle memory must stay within twice Prompuff's, measured the same way, and must come back under it after the review window closes. Sweepling must cost less than the leftovers it finds. A change that grows idle memory records the new number in `ROADMAP.md`. Keep software rendering: Avalonia's GPU renderer held about 60 MB from launch, window or not.
 - **Leave nothing behind.** Sweepling's own processes end when it quits, including across an update restart.
+- **Never restart into an update while the review window is open.** The restart would end a review mid-way, with groups ticked. `UpdateGate` holds a downloaded update until the window closes.
 - **No telemetry. The update check is the only network call.** Sweepling sees every command line on the machine, so nothing about them leaves it.
 - **Mask command lines in logs.** Command lines carry tokens, keys and private paths. Shorten them and mask token-like strings before anything is written, and never put a real token in a fixture or test: build token-shaped values at run time.
 
@@ -64,11 +65,13 @@ One meaning per term. Code, docs, UI copy and agents use these words and no syno
 - `artifacts\publish\Sweepling.exe --scan > scan.json` prints the groups Sweepling would offer right now, as JSON with command lines masked, ignoring the grace period, and closes nothing. Redirect or pipe it: a WinExe doesn't make the shell wait.
 - The real-process tests in `tests/Sweepling.Tests/Windows` start their own processes and stop only those, checked by PID and start time. Their children redirect output and time out on their own, because a child holding the test runner's output pipe hangs `dotnet test`.
 - `powershell -NoProfile -File scripts/tray.ps1 open <screenshot.png> | done | quit` drives the running app's tray and window through UI Automation for hand tests: open the review window from the icon, press Done, or choose Quit in the tray menu. It finds each element by name right before acting and restores the cursor.
-  - A new icon sits in the hidden-icons overflow (window class `TopLevelWindowForOverflowXamlIsland`), as a button named after its tooltip.
+  - A new icon sits in the hidden-icons overflow (window class `TopLevelWindowForOverflowXamlIsland`), as a button named after its tooltip. Once the owner pins it, it's a button on the taskbar itself; the script looks there first.
   - UI Automation lists no items in the Win32 tray menu, so `quit` posts keys to the menu's own window rather than to the screen.
   - Windows' notifications don't show up in UI Automation, so ask the owner whether one appeared.
 - Measure idle memory with the watch running for 75 s, then with the window open, then two minutes after it closes.
 - `dotnet run scripts/make-icons.cs` rebuilds `docs/brand/sweepling.ico` from `docs/brand/tray.svg`; `scripts/make_brand.py` regenerates the SVGs (see its header).
+- Releases: `.github/workflows/release.yml` builds, signs and drafts a release from a `v*` tag. Run it by hand to build unsigned. `dotnet tool restore` installs `vpk`, pinned in `dotnet-tools.json` to the Velopack package's version.
+- To try an update locally: publish, `dotnet vpk pack` versions 0.1.0 and then 0.1.1 into one scratch folder with the arguments `release.yml` uses, and keep a copy of the 0.1.0 Setup from before the second pack. Install it with `--silent`, then start `%LOCALAPPDATA%\Sweepling\current\Sweepling.exe` with `SWEEPLING_UPDATE_SOURCE` set to that folder: about a minute later it updates itself. `%LOCALAPPDATA%\Sweepling\Update.exe uninstall --silent` removes it, its login start and its settings. Quit the dogfooding copy first, since only one Sweepling runs at a time.
 
 ## Working style
 
