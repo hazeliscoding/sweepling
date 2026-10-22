@@ -39,7 +39,7 @@ The starting tokens for the review window. Every text pair below passes WCAG AA 
 | `border` | `#DDE5E2` | `#2E373B` | Dividers |
 | `text` | `#17312E` | `#E6F2EE` | Body text |
 | `text-muted` | `#4A5A57` | `#A9B8B4` | Paths, ages, memory |
-| `accent` | `#1F7A66` | `#7FD1BB` | Links, focus ring, ticked boxes |
+| `accent` | `#1F7A66`, tick `#FFFFFF` | `#7FD1BB`, tick `#1B2124` | Links, focus ring, ticked boxes, in place of the Windows accent color |
 | `close` | `#C2410C`, text `#FFFFFF` | `#FB8B5B`, text `#1B2124` | The Close button and the tray badge |
 | `close-hover` | `#9A3412` | `#FDA47E` | Close button hover |
 | `caution` | `#8A6100` | `#E9B949` | "Session still running" label |
