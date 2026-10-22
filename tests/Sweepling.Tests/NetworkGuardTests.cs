@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Sweepling.Tests;
 
 /// <summary>
-/// No telemetry: the update check is the only network call, and it belongs to Velopack (M3),
+/// No telemetry: the update check is the only network call, and it belongs to Velopack,
 /// so Sweepling's own code never references a networking assembly.
 /// </summary>
 public sealed class NetworkGuardTests

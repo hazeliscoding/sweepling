@@ -21,6 +21,7 @@ public sealed unsafe class NotifyIcon : IDisposable
     private const uint IconId = 1;
     private const uint MenuReview = 1;
     private const uint MenuQuit = 2;
+    private const uint MenuOptions = 10;
     private const uint TrackReturnCommand = 0x0100;
     private const uint TrackRightButton = 0x0002;
     private const uint TrackBottomAlign = 0x0020;
@@ -68,6 +69,9 @@ public sealed unsafe class NotifyIcon : IDisposable
     public event Action? Opened;
 
     public event Action? QuitChosen;
+
+    /// <summary>Ticked items between Review leftovers and Quit, each read again whenever the menu opens.</summary>
+    public IReadOnlyList<MenuOption> Options { get; set; } = [];
 
     public void Update(byte[] icon, string tooltip)
     {
@@ -170,11 +174,26 @@ public sealed unsafe class NotifyIcon : IDisposable
         var menu = PInvoke.CreatePopupMenu();
         try
         {
+            var options = Options;
             fixed (char* review = "Review leftovers")
             fixed (char* quit = "Quit Sweepling")
             {
                 PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuReview, review);
                 PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, (PCWSTR)null);
+                for (var i = 0; i < options.Count; i++)
+                {
+                    fixed (char* label = options[i].Label)
+                    {
+                        var flags = MENU_ITEM_FLAGS.MF_STRING | (options[i].IsOn() ? MENU_ITEM_FLAGS.MF_CHECKED : 0);
+                        PInvoke.AppendMenu(menu, flags, MenuOptions + (uint)i, label);
+                    }
+                }
+
+                if (options.Count > 0)
+                {
+                    PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_SEPARATOR, 0, (PCWSTR)null);
+                }
+
                 PInvoke.AppendMenu(menu, MENU_ITEM_FLAGS.MF_STRING, MenuQuit, quit);
             }
 
@@ -188,6 +207,7 @@ public sealed unsafe class NotifyIcon : IDisposable
             {
                 MenuReview => Opened,
                 MenuQuit => QuitChosen,
+                >= MenuOptions when chosen - MenuOptions < options.Count => options[(int)(chosen - MenuOptions)].Toggle,
                 _ => null,
             });
         }
@@ -219,3 +239,6 @@ public sealed unsafe class NotifyIcon : IDisposable
         return PInvoke.DefWindowProc(window, message, wParam, lParam);
     }
 }
+
+/// <summary>A tray menu item with a tick, such as Start at login. Toggle runs on the UI thread.</summary>
+public sealed record MenuOption(string Label, Func<bool> IsOn, Action Toggle);

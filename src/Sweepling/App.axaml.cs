@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Sweepling.Install;
 using Sweepling.Leftovers;
 using Sweepling.Review;
 using Sweepling.Windows;
@@ -22,6 +23,8 @@ public sealed partial class App : Application
     private ReviewWindow? _window;
     private IReadOnlyList<Group> _latest = [];
     private int _leftovers;
+    private Updates? _updates;
+    private UpdateGate? _gate;
 
     public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -45,9 +48,15 @@ public sealed partial class App : Application
             _watcher.Updated += OnUpdated;
             _watcher.Start();
 
+            if (Installation.IsInstalled)
+            {
+                StartUpdates(desktop);
+            }
+
             // Removing the icon on exit keeps a dead icon from lingering in the tray.
             desktop.Exit += (_, _) =>
             {
+                _updates?.Dispose();
                 _watcher.Dispose();
                 _tray.Dispose();
             };
@@ -79,8 +88,50 @@ public sealed partial class App : Application
 
             // Hand the window's memory back to Windows rather than keep it for a window that may not open again.
             GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+            _gate?.WindowClosed();
         };
+        _gate?.WindowOpened();
         _window.ShowNearTray();
+    }
+
+    /// <summary>An installed copy starts at login and keeps itself up to date; the tray menu turns either off.</summary>
+    private void StartUpdates(IClassicDesktopStyleApplicationLifetime desktop)
+    {
+        var login = new LoginStart();
+        var preferences = new Preferences();
+        _tray!.Options =
+        [
+            new("Start at login", () => login.IsOn, () =>
+            {
+                if (login.IsOn)
+                {
+                    login.TurnOff();
+                }
+                else
+                {
+                    login.TurnOn(Environment.ProcessPath!);
+                }
+            }),
+            new("Update automatically", () => preferences.UpdateAutomatically, () => preferences.UpdateAutomatically = !preferences.UpdateAutomatically),
+        ];
+
+        var updates = _updates = new Updates(() => preferences.UpdateAutomatically, SynchronizationContext.Current!);
+        _gate = new UpdateGate(() =>
+        {
+            try
+            {
+                updates.InstallAfterExit();
+            }
+            catch (Exception)
+            {
+                // The updater didn't start: keep running, and the update installs at the next start.
+                return;
+            }
+
+            desktop.Shutdown();
+        });
+        updates.Downloaded += _gate.Downloaded;
+        updates.Start();
     }
 
     private static (Rules Rules, string? Problem) LoadRules()

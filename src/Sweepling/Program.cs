@@ -1,7 +1,9 @@
 using Avalonia;
 using Avalonia.Threading;
+using Sweepling.Install;
 using Sweepling.Leftovers;
 using Sweepling.Windows;
+using Velopack;
 using Windows.Win32;
 
 namespace Sweepling;
@@ -13,6 +15,20 @@ internal static class Program
     [STAThread]
     public static int Main(string[] args)
     {
+        // Setup and the uninstaller start an installed copy with their own arguments; Velopack handles those
+        // and exits. It also installs an update that was downloaded before the last exit.
+        if (Installation.IsInstalled)
+        {
+            VelopackApp.Build()
+                .OnAfterInstallFastCallback(_ => new LoginStart().TurnOn(Environment.ProcessPath!))
+                .OnBeforeUninstallFastCallback(_ =>
+                {
+                    new LoginStart().TurnOff();
+                    new Preferences().Remove();
+                })
+                .Run();
+        }
+
         if (args is ["--scan"])
         {
             return Scan();
