@@ -60,6 +60,22 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - **Git Bash programs report their real folder.** *This corrects the commit "read a shown process's folder and memory", which called the `C:\git` they reported a placeholder: it was the folder their Claude Code session worked in.* The environment finding above still holds.
 - **Left to the builder:** nothing now. The review window, notifications, close order and gentle close were settled in M2, above, and the rest in M1.
 
+## Decisions (2026-10-22)
+
+- **Primrose Stack joins as Sweepling's character, beside Pebble.** Pebble stays the logo and the tray icon. Primrose, a café owner who clears forgotten cups only after asking whose they are, appears in the README, in `docs/brand/primrose/`, and in the review window when there is nothing to sweep, dozing as the tray icon does. Her art is AI-generated and Apache-2.0 like the code, and the README says both. This gives up a single mascot, and 63.5 KB of exe for the 256 px sticker the window shows.
+- **The window's Primrose costs no idle memory.** The sticker loads with the review window, never in the tray. Each build was launched fresh on the same machine, and its window was opened inside the grace period, while it was still empty:
+
+  | | Working set | Private bytes | Private working set |
+  |---|---|---|---|
+  | Before, tray only | 33.1 MB | 15.6 MB | 12.7 MB |
+  | With Primrose, tray only | 31.1 MB | 13.7 MB | 10.9 MB |
+  | Before, empty window open | 48.1 MB | 18.4 MB | 15.3 MB |
+  | With Primrose, empty window open | 48.4 MB | 18.6 MB | 15.6 MB |
+  | Before, 120 s after close | 46.9 MB | 16.3 MB | 13.3 MB |
+  | With Primrose, 120 s after close | 46.8 MB | 16.6 MB | 13.3 MB |
+
+  The differences are within the noise between runs. Prompuff wasn't read again; against M2's reading of it, the ceiling still holds on every counter.
+
 ## M0: Placeholder
 
 - [x] .NET 10 solution with central package versions and an Avalonia 12 tray-only app: an icon and Quit, no window.
@@ -164,6 +180,8 @@ A dogfooding log in `docs/dogfooding.md`, kept from M2 on: leftovers found, grou
 - Cursor and other agents.
 - The Claude desktop app.
 - A winget package.
+- Primrose's still-sipping sticker beside Session still running, in the README and the window, once its see-through gap is fixed.
+- Primrose's found-one, one-more-look and all-swept stickers, once they're drawn.
 
 ## Not planned
 
