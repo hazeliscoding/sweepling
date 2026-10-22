@@ -90,7 +90,7 @@ Checked against their own docs on 2026-10-21.
 
 ## Contributing
 
-It's early, so code contributions open with the release milestone. Until then, issues describing a leftover you've seen on Windows are welcome: what started it, its command line with anything private removed, and how you noticed.
+Issues describing a leftover you've seen on Windows are the most useful: what started it, its command line with anything private removed, and how you noticed. [CONTRIBUTING.md](CONTRIBUTING.md) covers building, testing and the rules every change keeps. Report security problems privately, as [SECURITY.md](SECURITY.md) describes.
 
 ## License
 
