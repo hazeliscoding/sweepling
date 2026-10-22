@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Headless;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Sweepling;
@@ -17,19 +18,49 @@ using var session = HeadlessUnitTestSession.StartNew(typeof(Shots));
 session.Dispatch(() =>
 {
     // Dark first: after a switch from light to dark, the expanders' chevrons render as a bent corner.
-    foreach (var (theme, name) in new[] { (ThemeVariant.Dark, "review-dark.png"), (ThemeVariant.Light, "review-light.png") })
+    // Each border is the theme's line token from docs/brand/README.md.
+    foreach (var (theme, border, name) in new[]
+    {
+        (ThemeVariant.Dark, Color.Parse("#2E373B"), "review-dark.png"),
+        (ThemeVariant.Light, Color.Parse("#DDE5E2"), "review-light.png"),
+    })
     {
         Application.Current!.RequestedThemeVariant = theme;
 
         // Tall enough to show the Session still running group whole.
         var window = new ReviewWindow(Demo.Model()) { Height = 770 };
         window.Show();
-
-        window.CaptureRenderedFrame()!.Save(Path.Combine(output.FullName, name), new PngBitmapEncoderOptions());
+        Save(window, border, Path.Combine(output.FullName, name));
         window.Close();
         Console.WriteLine($"Wrote {Path.Combine(output.FullName, name)}");
     }
 }, CancellationToken.None).GetAwaiter().GetResult();
+
+// At twice the pixels, for sharp text on high-DPI screens, with rounded corners and a hairline border
+// so the window stands out on a page of the same color.
+static void Save(ReviewWindow window, Color border, string path)
+{
+    var size = window.ClientSize;
+    var pixels = new PixelSize((int)size.Width * 2, (int)size.Height * 2);
+    var dpi = new Vector(192, 192);
+    using var frame = new RenderTargetBitmap(pixels, dpi);
+    frame.Render(window);
+
+    using var framed = new RenderTargetBitmap(pixels, dpi);
+    using (var context = framed.CreateDrawingContext())
+    {
+        var outline = new RoundedRect(new Rect(size), 8);
+        using (context.PushClip(outline))
+        {
+            // The source rectangle is in the frame's pixels, the destination in layout units.
+            context.DrawImage(frame, new Rect(0, 0, pixels.Width, pixels.Height), new Rect(size));
+        }
+
+        context.DrawRectangle(null, new Pen(new SolidColorBrush(border), 1), outline.Deflate(0.5, 0.5));
+    }
+
+    framed.Save(path, new PngBitmapEncoderOptions());
+}
 
 internal static class Shots
 {
