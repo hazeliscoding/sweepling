@@ -195,7 +195,7 @@ A dogfooding log in `docs/dogfooding.md`, kept from M2 on: leftovers found, grou
 - Find out why the tray icon's accessible name repeats the tooltip it started with ("Sweepling: nothing to sweep Sweepling: 12 leftovers").
 - Cursor and other agents.
 - The Claude desktop app.
-- A winget package.
+- A winget package. *0.1.0's manifest, `hazeliscoding.Sweepling`, was submitted on 2026-10-22 as [winget-pkgs #459589](https://github.com/microsoft/winget-pkgs/pull/459589); each later release needs an updated manifest until a release step opens that pull request.*
 - Primrose's still-sipping sticker beside Session still running, in the README and the window, once its see-through gap is fixed.
 - Primrose's found-one, one-more-look and all-swept stickers, once they're drawn.
 
