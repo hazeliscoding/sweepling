@@ -86,7 +86,7 @@ Sweepling starts when you sign in and keeps itself up to date; right-click the b
 
 <img align="right" width="150" src="docs/brand/primrose/lights-out.png" alt="Primrose dozes with her cheek on her hands, as Sweepling does when there is nothing to sweep.">
 
-**In development.** The first release comes after the owner's week of dogfooding, so until then there is nothing to download and the steps above don't work yet. A build from source runs the tray app: it counts leftovers, notifies you when more appear, and closes the groups you tick. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
+**0.1.0, the first release.** The owner's first week of daily use runs alongside it, so reports are welcome, above all of anything Sweepling offered while it was still in use. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
 
 <br clear="right">
 
@@ -94,7 +94,7 @@ Sweepling starts when you sign in and keeps itself up to date; right-click the b
 
 Checked against their own docs on 2026-10-22.
 
-| | Sweepling (planned) | [cc-reaper](https://github.com/theQuert/cc-reaper) | [kill-port](https://github.com/tiaanduplessis/kill-port) or hand-written commands |
+| | Sweepling | [cc-reaper](https://github.com/theQuert/cc-reaper) | [kill-port](https://github.com/tiaanduplessis/kill-port) or hand-written commands |
 |---|---|---|---|
 | Platforms | Windows | macOS and Linux | Any |
 | Finds | Each Claude Code session's family tree, plus command-line rules | Orphans in a Claude CLI session's process group, plus command patterns | Whatever holds the port or PID you name |
