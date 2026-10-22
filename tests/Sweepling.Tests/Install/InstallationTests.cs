@@ -6,7 +6,8 @@ namespace Sweepling.Tests.Install;
 /// <summary>Each test works under its own scratch key, never the real Run key or Sweepling's settings.</summary>
 public sealed class InstallationTests : IDisposable
 {
-    private readonly string _scratch = $@"Software\Sweepling.Tests\{Guid.NewGuid():N}";
+    // One key per test, directly under Software, so deleting it leaves nothing behind.
+    private readonly string _scratch = $@"Software\Sweepling.Tests.{Guid.NewGuid():N}";
 
     public void Dispose() => Registry.CurrentUser.DeleteSubKeyTree(_scratch, throwOnMissingSubKey: false);
 
