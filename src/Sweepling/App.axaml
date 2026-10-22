@@ -43,6 +43,10 @@
           <SolidColorBrush x:Key="ExpanderHeaderBorderBrushPressed" Color="#2E373B" />
           <SolidColorBrush x:Key="ExpanderContentBackground" Color="Transparent" />
           <SolidColorBrush x:Key="ExpanderContentBorderBrush" Color="#2E373B" />
+          <!-- The dark accent is light, so a ticked box's tick is dark, as the Close button's text is. -->
+          <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundChecked" Color="#1B2124" />
+          <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" Color="#1B2124" />
+          <SolidColorBrush x:Key="CheckBoxCheckGlyphForegroundCheckedPressed" Color="#1B2124" />
         </ResourceDictionary>
       </ResourceDictionary.ThemeDictionaries>
       <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas</FontFamily>
@@ -51,7 +55,13 @@
   </Application.Resources>
 
   <Application.Styles>
-    <FluentTheme />
+    <!-- The brand's accent, not the Windows one: ticked boxes, focus rings and links follow the tokens. -->
+    <FluentTheme>
+      <FluentTheme.Palettes>
+        <ColorPaletteResources x:Key="Light" Accent="#1F7A66" />
+        <ColorPaletteResources x:Key="Dark" Accent="#7FD1BB" />
+      </FluentTheme.Palettes>
+    </FluentTheme>
     <Style Selector="Button.close /template/ ContentPresenter#PART_ContentPresenter">
       <Setter Property="Background" Value="{DynamicResource CloseBrush}" />
       <Setter Property="Foreground" Value="{DynamicResource CloseTextBrush}" />
