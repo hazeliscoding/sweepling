@@ -111,4 +111,4 @@ Issues describing a leftover you've seen on Windows are the most useful: what st
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE). Primrose, the café owner in this README, was drawn with an AI image model and is Apache-2.0 like the code. Sweepling is an independent project, not affiliated with or endorsed by Anthropic.
+Apache-2.0. See [LICENSE](LICENSE). Primrose, the café owner in this README, was drawn with an AI image model and is Apache-2.0 like the code. Hand-drawn art of her by [@wrenishacking](https://github.com/wrenishacking) is on the way. Sweepling is an independent project, not affiliated with or endorsed by Anthropic.

@@ -198,6 +198,7 @@ A dogfooding log in `docs/dogfooding.md`, kept from M2 on: leftovers found, grou
 - A winget package. *0.1.0's manifest, `hazeliscoding.Sweepling`, was submitted on 2026-10-22 as [winget-pkgs #459589](https://github.com/microsoft/winget-pkgs/pull/459589); each later release needs an updated manifest until a release step opens that pull request.*
 - Primrose's still-sipping sticker beside Session still running, in the README and the window, once its see-through gap is fixed.
 - Primrose's found-one, one-more-look and all-swept stickers, once they're drawn.
+- Hand-drawn Primrose art by [@wrenishacking](https://github.com/wrenishacking), on the way. Agree its license with the artist before it goes in, since the AI-drawn stickers are Apache-2.0 like the code.
 
 ## Not planned
 
