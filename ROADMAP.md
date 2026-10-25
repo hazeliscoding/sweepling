@@ -205,6 +205,7 @@ A dogfooding log in `docs/dogfooding.md`, kept from M2 on: leftovers found, grou
 - Primrose's found-one, one-more-look and all-swept stickers, once they're drawn.
 - Hand-drawn Primrose art by [@wrenishacking](https://github.com/wrenishacking), on the way. Agree its license with the artist before it goes in, since the AI-drawn stickers are Apache-2.0 like the code.
 - Sweep stale worktrees and their build output once their agent session has ended, only after you confirm, and never a worktree with uncommitted or unpushed work.
+- A ports view: which session or worktree each listening dev server belongs to, so two agents' servers can be told apart.
 
 ## Not planned
 
