@@ -84,6 +84,10 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - **README screenshots are rendered from made-up leftovers**, by `tools/Sweepling.Screenshots` through Avalonia's headless platform with Skia. A screenshot of the real window shows the owner's real folders and projects, and covering them by hand is easy to get wrong. The tool also makes the same pictures every time, in light and dark. This gives up the real window frame in the pictures, and adds `Avalonia.Headless`, a package of the framework already in use, to a tool that never ships.
 - **The logo is Primrose's hand brush, option 2B2.** Pebble's round critter clashed with Primrose's style, so the logo moved into hers: heavy ink outlines and flat fills. It was picked on the claude.ai design canvas "Sweepling logo" from three broom takes (her bell bob, her hand brush, a mug and broom) and three refinements of the brush. It is her straw hand brush with a pistachio handle like her shirt, and an ink-green band with a straw stripe like her trousers and belt. In the tray it stands upright with the count badge clear of its bristles, and lies down when there is nothing to sweep. It had the cleanest 16 px silhouette of the takes. This gives up a face on the tray icon, closed eyes as the idle state, and the mint of the old mascot.
 
+## Decisions (2026-10-24)
+
+- **Releases are signed in a job of their own.** The build job runs the tests and the build, and every package they load, so it can't get a token. The package job takes the built files and only packs and signs them with vpk. A compromised package could otherwise take the token and sign files of its own with the owner's certificate, unseen in any release. A package that changes the build is still signed with it. This gives up a single job: a release starts a second Windows runner and passes the build between them.
+
 ## M0: Placeholder
 
 - [x] .NET 10 solution with central package versions and an Avalonia 12 tray-only app: an icon and Quit, no window.
