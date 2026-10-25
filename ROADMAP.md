@@ -87,6 +87,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
 ## Decisions (2026-10-24)
 
 - **Releases are signed in a job of their own.** The build job runs the tests and the build, and every package they load, so it can't get a token. The package job takes the built files and only packs and signs them with vpk. A compromised package could otherwise take the token and sign files of its own with the owner's certificate, unseen in any release. A package that changes the build is still signed with it. This gives up a single job: a release starts a second Windows runner and passes the build between them.
+- **Cleaning stale worktrees and their build output moves to Later.** Running several agents at once fills the disk with their worktrees, `node_modules`, `bin` and `obj`. kondo and npkill clean build output folder by folder, but don't know which worktree belongs to an ended agent session; Sweepling already ties processes to sessions and their project folders. Deleting files can't be undone the way closing a process can, so it gets its own safety rules before it's built. This gives up the processes-only scope. *Disks, caches and temp folders stay Not planned.*
 
 ## M0: Placeholder
 
@@ -203,11 +204,12 @@ A dogfooding log in `docs/dogfooding.md`, kept from M2 on: leftovers found, grou
 - Primrose's still-sipping sticker beside Session still running, in the README and the window, once its see-through gap is fixed.
 - Primrose's found-one, one-more-look and all-swept stickers, once they're drawn.
 - Hand-drawn Primrose art by [@wrenishacking](https://github.com/wrenishacking), on the way. Agree its license with the artist before it goes in, since the AI-drawn stickers are Apache-2.0 like the code.
+- Sweep stale worktrees and their build output once their agent session has ended, only after you confirm, and never a worktree with uncommitted or unpushed work.
 
 ## Not planned
 
 - macOS and Linux: cc-reaper covers them.
-- Cleaning disks, caches, temp folders or worktrees.
+- Cleaning disks, caches, temp folders or worktrees. *Superseded on 2026-10-24 for worktrees and their build output, which moved to Later; disks, caches and temp folders stay Not planned.*
 - Closing anything without confirmation, or anything still in use, especially an agent session or Orca's daemon.
 - Idling heavier than the leftovers it finds, or leaving its own processes behind, including across an update restart.
 - Telemetry, accounts or any network call besides the update check.
