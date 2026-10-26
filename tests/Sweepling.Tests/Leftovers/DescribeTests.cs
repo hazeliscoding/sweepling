@@ -11,6 +11,7 @@ public sealed class DescribeTests
     [Theory]
     [InlineData(@"node C:\app\node_modules\next\dist\bin\next dev --turbopack", "Next.js dev server")]
     [InlineData(@"node C:\app\node_modules\@angular\cli\bin\ng serve --port 4300", "Angular dev server")]
+    [InlineData(@"""node""   ""C:\app\node_modules\.bin\\..\@angular\cli\bin\ng.js"" serve", "Angular dev server")]
     [InlineData(@"node C:\app\node_modules\vite\bin\vite.js", "Vite dev server")]
     [InlineData(@"node C:\app\node_modules\webpack\bin\webpack.js serve", "webpack dev server")]
     [InlineData(@"dotnet watch run", ".NET watch")]
@@ -46,6 +47,16 @@ public sealed class DescribeTests
     [Fact]
     public void Anything_else_is_named_by_its_program() =>
         Assert.Equal("python", What(P(1, 0, 0, @"C:\Python\python.exe", "python train.py")));
+
+    // A protected stray, like conhost.exe, is left out of the group's members but stays among its strays.
+    [Fact]
+    public void Anything_else_is_named_by_a_member_not_a_protected_stray()
+    {
+        var conhost = P(1, 0, 0, @"C:\Windows\System32\conhost.exe", @"\??\C:\Windows\system32\conhost.exe 0xffffffff -ForceV1");
+        var python = P(2, 0, 0, @"C:\Python\python.exe", "python app.py");
+
+        Assert.Equal("python", Describe.What(new Group(SessionState.Ended, Tie.CommandLine, [conhost, python], [python], [])));
+    }
 
     [Theory]
     [InlineData(@"C:\Users\test\AppData\Local\Temp\claude\C--repos-pdfcraft\0b6c\tasks\b1.output", @"C:\repos\pdfcraft")]

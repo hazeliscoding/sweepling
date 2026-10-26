@@ -33,7 +33,7 @@ public static partial class Describe
             }
         }
 
-        return Path.GetFileNameWithoutExtension(group.Strays[0].Image);
+        return Path.GetFileNameWithoutExtension(group.Members[0].Image);
     }
 
     /// <summary>The group's folder: its first member's that can be read, else the project a Claude Code temp path names.</summary>
@@ -84,7 +84,8 @@ public static partial class Describe
     [GeneratedRegex(@"\bnext\s+dev\b|[\\/]next[\\/]dist[\\/]|next-server", RegexOptions.IgnoreCase)]
     private static partial Regex NextJs();
 
-    [GeneratedRegex(@"\bng\s+serve\b", RegexOptions.IgnoreCase)]
+    // The Angular CLI runs as node "...\@angular\cli\bin\ng.js" serve.
+    [GeneratedRegex(@"\bng(\.js"")?\s+serve\b", RegexOptions.IgnoreCase)]
     private static partial Regex Angular();
 
     [GeneratedRegex(@"[\\/]vite[\\/]bin[\\/]|\bvite(\s|$)", RegexOptions.IgnoreCase)]

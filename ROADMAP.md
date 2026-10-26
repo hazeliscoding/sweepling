@@ -169,7 +169,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - [x] README: install steps, a screenshot, and the comparison with today's alternatives checked again.
 - [x] `CONTRIBUTING.md` and `SECURITY.md`.
 - [x] Mask the user's name in Claude Code's temp paths. Claude Code writes the project path with hyphens, as in `C--Users-<name>-…`, which gets past the `%USERPROFILE%` replacement, so the name is in five lines of the owner's closed log and in `--scan` output.
-- [ ] Name a group with no known kind after one of its members, not its first stray. The first stray can be a protected `conhost.exe` outside the group: on 2026-10-25, made-up Vitest and Flask leftovers both showed as "conhost".
+- [x] Name a group with no known kind after one of its members, not its first stray. The first stray can be a protected `conhost.exe` outside the group: on 2026-10-25, made-up Vitest and Flask leftovers both showed as "conhost".
 - [ ] The OSS launch gates:
   - [ ] the core journey works end to end: notice, review, close;
   - [ ] a fresh install works, and supported Windows versions are documented;
