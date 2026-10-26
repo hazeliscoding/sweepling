@@ -17,7 +17,8 @@ public static partial class CommandLineMask
         {
             masked = masked
                 .Replace(userProfile, "%USERPROFILE%", StringComparison.OrdinalIgnoreCase)
-                .Replace(userProfile.Replace('\\', '/'), "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
+                .Replace(userProfile.Replace('\\', '/'), "%USERPROFILE%", StringComparison.OrdinalIgnoreCase)
+                .Replace(NotLetterOrDigit().Replace(userProfile, "-"), "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
         }
 
         masked = SecretValue().Replace(masked, "${name}${separator}<masked>");
@@ -25,6 +26,10 @@ public static partial class CommandLineMask
         masked = LongOpaque().Replace(masked, "<masked>");
         return masked.Length > MaxLength ? masked[..MaxLength] + "…" : masked;
     }
+
+    // Claude Code names a project's temp folder after its path this way, as in C--Users-<name>-code-app.
+    [GeneratedRegex("[^A-Za-z0-9]", RegexOptions.CultureInvariant)]
+    private static partial Regex NotLetterOrDigit();
 
     // The value after a name like --token=, --api-key or PASSWORD=.
     [GeneratedRegex(@"(?<name>[\w-]*(token|secret|password|passwd|api[-_]?key|auth)[\w-]*)(?<separator>=|\s+)(?!<masked>)\S+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]

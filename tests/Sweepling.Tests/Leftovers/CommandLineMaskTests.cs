@@ -15,6 +15,13 @@ public sealed class CommandLineMaskTests
     public void Replaces_the_user_profile_path(string commandLine, string expected) =>
         Assert.Equal(expected, CommandLineMask.Apply(commandLine, Profile));
 
+    // Claude Code names a project's temp folder after its path, with a hyphen for everything but letters and digits.
+    [Theory]
+    [InlineData(@"C:\Users\test", @"tail -f C:\Users\test\AppData\Local\Temp\claude\C--Users-test-app\t\x.output", @"tail -f %USERPROFILE%\AppData\Local\Temp\claude\%USERPROFILE%-app\t\x.output")]
+    [InlineData(@"C:\Users\first.last", @"cat C--Users-first-last--claude\x", @"cat %USERPROFILE%--claude\x")]
+    public void Replaces_the_user_profile_in_a_claude_code_project_name(string profile, string commandLine, string expected) =>
+        Assert.Equal(expected, CommandLineMask.Apply(commandLine, profile));
+
     [Fact]
     public void Masks_a_token_with_a_known_prefix() =>
         Assert.Equal("git push https://<masked>@github.com/a/b", CommandLineMask.Apply($"git push https://{GitHubToken}@github.com/a/b", Profile));
