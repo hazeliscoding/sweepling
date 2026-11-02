@@ -143,8 +143,9 @@ Given up for them: features that need administrator rights, cross-platform suppo
 
 **Done when:** an integration test closes a fake orphaned dev server and its port frees, a PID-reuse test refuses to close, and a week of the owner's dogfooding log exists.
 
-**So far, on 2026-10-21.** M2 stays open until the dogfooding log in `docs/dogfooding.md` covers a week, through 2026-10-28.
+**Done on 2026-10-28:**
 
+- The dogfooding log in `docs/dogfooding.md` covers the week from 2026-10-21 to 2026-10-28. 26 groups were closed, 2 of them fake dev servers started for the test, and nothing offered was still in use. Sweepling updated itself twice that week, to the signed 0.1.0 and then 0.1.1. The one naming miss it turned up, an Angular dev server shown as "npm start", was fixed in 0.1.1.
 - The integration test closes a fake orphaned dev server and its port frees, and the PID-reuse test refuses to close. Two more cover a group that gained a connection after it was listed, and a process that already ended. Removing the start-time check or the connection check fails its test.
 - The snapshot cache brought a snapshot of about 695 processes to 32–43 ms after the first one's 150 ms. The watch costs about 0.6% of one core.
 - The published build was driven through the real tray and window with UI Automation, on the owner's machine.
