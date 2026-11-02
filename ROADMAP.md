@@ -172,13 +172,13 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - [x] Mask the user's name in Claude Code's temp paths. Claude Code writes the project path with hyphens, as in `C--Users-<name>-…`, which gets past the `%USERPROFILE%` replacement, so the name is in five lines of the owner's closed log and in `--scan` output.
 - [x] Name a group with no known kind after one of its members, not its first stray. The first stray can be a protected `conhost.exe` outside the group: on 2026-10-25, made-up Vitest and Flask leftovers both showed as "conhost".
 - [ ] The OSS launch gates:
-  - [ ] the core journey works end to end: notice, review, close;
+  - [x] the core journey works end to end: notice, review, close;
   - [ ] a fresh install works, and supported Windows versions are documented;
   - [ ] the README quick start is accurate;
   - [ ] CI is green and there are no known critical bugs;
   - [ ] the release artifact installs, updates itself and uninstalls cleanly;
-  - [ ] error messages are understandable;
-  - [ ] the issue tracker is ready for reports.
+  - [x] error messages are understandable;
+  - [x] the issue tracker is ready for reports.
 
 **Done when:** an installed release updates itself to a later test release without leaving a Sweepling process behind, Setup and `Sweepling.exe` carry a valid signature, and every gate above is ticked.
 
@@ -190,6 +190,12 @@ Given up for them: features that need administrator rights, cross-platform suppo
 - The README has install steps and a screenshot of the review window, light and dark. The comparison was checked again on 2026-10-22: cc-reaper now has an optional hourly reaper that can stop a dev server serving nobody, report-only by default, so its row says so.
 - A local, unsigned run: version 0.1.0, installed from a scratch feed, found 0.1.1 a minute after it started and was running it 4 s later as a single Sweepling, with Velopack's updater gone. Uninstalling removed the install folder, the login start, the Start menu shortcut and the uninstall entry, and left the close log.
 - v0.1.1 was tagged on `f72c486` and published on 2026-10-26. Setup, `Sweepling.exe`, the launch stub and Velopack's updater are signed by Hazel Granados and timestamped, and the checksums match. The owner's installed 0.1.0 found it at its 4-hourly check that morning and was running 0.1.1 9 s later, as one Sweepling process with no updater left. That meets the Done line's update from one release to a later one; the launch gates are still open.
+- Three launch gates were checked on 2026-11-01.
+  - The core journey ran end to end in M2's hand test and through the dogfooding week, which closed groups on the released 0.1.0 too.
+  - The issue tracker has bug and leftover forms, a `leftover` label, and private vulnerability reporting.
+  - Every message a person can see was read. A broken rules file now names the line an editor shows, where System.Text.Json counts from 0. An empty one says it's empty, and a group that couldn't be closed says Windows didn't allow it.
+  - The install steps match the code and the 0.1.1 release; following them on a fresh install is still to do.
+  - The real-process test `A_real_orphan_listening_on_a_port_is_offered_until_something_connects` failed once in three full local runs and passed alone, without its message captured. CI has stayed green.
 
 ## How we'll know it works
 
