@@ -222,7 +222,7 @@ public sealed partial class ReviewViewModel : ObservableObject
 
         if (failed > 0)
         {
-            parts.Add($"Couldn't close {Groups(failed)}.");
+            parts.Add($"Couldn't close {Groups(failed)}: Windows didn't allow it.");
         }
 
         return string.Join(" ", parts);

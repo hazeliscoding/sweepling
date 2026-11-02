@@ -120,6 +120,19 @@ public sealed class ReviewViewModelTests
     }
 
     [Fact]
+    public async Task A_group_that_couldnt_be_closed_stays_listed_and_says_why()
+    {
+        var model = Model(_ => CloseOutcome.Failed);
+        model.Show([Leftover]);
+
+        await model.CloseCommand.ExecuteAsync(null);
+
+        Assert.Single(model.Leftovers);
+        Assert.False(model.Leftovers[0].IsChecked);
+        Assert.Equal("Couldn't close 1 group: Windows didn't allow it.", model.Status);
+    }
+
+    [Fact]
     public void Close_is_named_by_how_many_groups_are_ticked_and_off_when_none_are()
     {
         var model = Model();
