@@ -77,6 +77,23 @@ public sealed class RulesTests
         Assert.Throws<InvalidDataException>(() => Sweepling.Leftovers.Rules.Parse(["""{ "version": 2 }"""], Env));
 
     [Fact]
+    public void A_broken_rules_file_names_the_line_an_editor_shows()
+    {
+        var ex = Assert.Throws<InvalidDataException>(() => Sweepling.Leftovers.Rules.Parse(["{\n  \"version\": 1\n  \"graceSeconds\": 5\n}"], Env));
+
+        Assert.StartsWith("A rules file isn't valid at line 3: ", ex.Message);
+        Assert.DoesNotContain("LineNumber", ex.Message);
+    }
+
+    [Fact]
+    public void An_empty_rules_file_says_so()
+    {
+        var ex = Assert.Throws<InvalidDataException>(() => Sweepling.Leftovers.Rules.Parse([" \n"], Env));
+
+        Assert.Equal("A rules file is empty.", ex.Message);
+    }
+
+    [Fact]
     public void A_rule_that_matches_nothing_is_refused() =>
         Assert.Throws<InvalidDataException>(() => Sweepling.Leftovers.Rules.Parse(["""{ "version": 1, "protect": [ { "name": "empty" } ] }"""], Env));
 }

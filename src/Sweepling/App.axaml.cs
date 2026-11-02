@@ -41,7 +41,7 @@ public sealed partial class App : Application
             _tray.QuitChosen += () => desktop.Shutdown();
             if (problem is not null)
             {
-                _tray.Notify("Sweepling's rules file has a problem", $"{problem} Sweepling is using its own rules until it's fixed.");
+                _tray.Notify("Your rules file has a problem", $"{problem} Sweepling is using its own rules until it's fixed.");
             }
 
             _watcher = new Watcher(rules, SynchronizationContext.Current!);

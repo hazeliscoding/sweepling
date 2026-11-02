@@ -75,13 +75,20 @@ public sealed partial class Rules
 
     private static RulesFile Deserialize(string json)
     {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            throw new InvalidDataException("A rules file is empty.");
+        }
+
         try
         {
             return JsonSerializer.Deserialize(json, RulesJson.Default.RulesFile) ?? throw new InvalidDataException("A rules file is empty.");
         }
         catch (JsonException ex)
         {
-            throw new InvalidDataException($"A rules file isn't valid: {ex.Message}", ex);
+            // The message ends in " Path: … | LineNumber: …", counted from 0; a person needs the line their editor shows.
+            var what = ex.Message.Split(" Path: ")[0];
+            throw new InvalidDataException(ex.LineNumber is { } line ? $"A rules file isn't valid at line {line + 1}: {what}" : $"A rules file isn't valid: {what}", ex);
         }
     }
 
