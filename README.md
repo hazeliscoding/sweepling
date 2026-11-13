@@ -86,7 +86,7 @@ Sweepling starts when you sign in and keeps itself up to date; right-click the b
 
 <img align="right" width="150" src="docs/brand/primrose/lights-out.png" alt="Primrose dozes with her cheek on her hands, as Sweepling does when there is nothing to sweep.">
 
-**0.1.1.** In the owner's first week of daily use, 24 groups were closed and nothing offered was still in use. Reports are welcome, above all of anything Sweepling offered while it was still in use. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
+**0.2.0.** In the owner's first week of daily use, 24 groups were closed and nothing offered was still in use. Reports are welcome, above all of anything Sweepling offered while it was still in use. If Sweepling crashes, its next launch shows the report, ready to file. `Sweepling.exe --scan > scan.json` lists what it would offer and closes nothing. [ROADMAP.md](ROADMAP.md) has the decisions and milestones. Version one covers the Claude Code CLI only; Codex, Cursor and the Claude desktop app come later.
 
 <br clear="right">
 
