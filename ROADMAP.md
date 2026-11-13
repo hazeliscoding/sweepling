@@ -203,6 +203,7 @@ Given up for them: features that need administrator rights, cross-platform suppo
   - Every message a person can see was read. A broken rules file now names the line an editor shows, where System.Text.Json counts from 0. An empty one says it's empty, and a group that couldn't be closed says Windows didn't allow it.
   - The install steps match the code and the 0.1.1 release; following them on a fresh install is still to do.
   - The real-process test `A_real_orphan_listening_on_a_port_is_offered_until_something_connects` failed once in three full local runs and passed alone, without its message captured. CI has stayed green.
+- v0.2.0 was tagged on `71586eb` and published on 2026-11-13, with crash reports through Oopsling 1.2.0. Setup is signed by Hazel Granados and timestamped, and its checksum matches. On 2026-11-12 the same real-process test failed once more, in a full run beside a NativeAOT publish that loaded the machine, and passed alone and in the next full run.
 
 ## How we'll know it works
 
