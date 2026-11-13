@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Threading;
+using Oopsling;
 using Sweepling.Install;
 using Sweepling.Leftovers;
 using Sweepling.Windows;
@@ -42,6 +43,13 @@ internal static class Program
             show.Set();
             return 0;
         }
+
+        // Writes a masked report to disk when a crash ends Sweepling. It sends nothing: the person files it themselves.
+        // It goes beside the close log, since Setup empties %LOCALAPPDATA%\Sweepling on every install.
+        CrashReports.Start(
+            "Sweepling",
+            "hazeliscoding/sweepling",
+            folder: Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Sweepling", "crashes"));
 
         var listener = new Thread(() =>
         {

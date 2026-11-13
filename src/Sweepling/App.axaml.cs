@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Oopsling.Avalonia;
 using Sweepling.Install;
 using Sweepling.Leftovers;
 using Sweepling.Review;
@@ -53,6 +54,12 @@ public sealed partial class App : Application
                 StartUpdates(desktop);
             }
 
+            // A crash report holds updates as the review window does: a restart would close it unfiled, and it's never
+            // shown again. Sweepling has no main window, so the report shows on its own.
+            Window.WindowOpenedEvent.AddClassHandler<CrashReportWindow>((_, _) => _gate?.WindowOpened());
+            Window.WindowClosedEvent.AddClassHandler<CrashReportWindow>((_, _) => WindowClosed());
+            CrashReportWindow.ShowUnshown();
+
             // Removing the icon on exit keeps a dead icon from lingering in the tray.
             desktop.Exit += (_, _) =>
             {
@@ -85,13 +92,17 @@ public sealed partial class App : Application
         _window.Closed += (_, _) =>
         {
             _window = null;
-
-            // Hand the window's memory back to Windows rather than keep it for a window that may not open again.
-            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
-            _gate?.WindowClosed();
+            WindowClosed();
         };
         _gate?.WindowOpened();
         _window.ShowNearTray();
+    }
+
+    private void WindowClosed()
+    {
+        // Hand the window's memory back to Windows rather than keep it for a window that may not open again.
+        GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+        _gate?.WindowClosed();
     }
 
     /// <summary>An installed copy starts at login and keeps itself up to date; the tray menu turns either off.</summary>
