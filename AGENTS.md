@@ -28,7 +28,7 @@ Each rule has its reason, so it can be applied to cases it didn't foresee. When 
 - **Stay under the idle ceiling.** Tray-only idle memory must stay within twice Prompuff's, measured the same way, and must come back under it after the review window closes. Sweepling must cost less than the leftovers it finds. A change that grows idle memory records the new number in `ROADMAP.md`. Keep software rendering: Avalonia's GPU renderer held about 60 MB from launch, window or not.
 - **Leave nothing behind.** Sweepling's own processes end when it quits, including across an update restart.
 - **Never restart into an update while the review window is open.** The restart would end a review mid-way, with groups ticked. `UpdateGate` holds a downloaded update until the window closes.
-- **No telemetry. The update check is the only network call.** Sweepling sees every command line on the machine, so nothing about them leaves it.
+- **No telemetry, and no crash reports that Sweepling sends itself. The update check is the only network call.** Sweepling sees every command line on the machine, so nothing about them leaves it. Oopsling writes a crash report to disk, and only the person files it, from their own browser. A test fails if Sweepling's code or Oopsling's references a networking assembly.
 - **Mask command lines in logs.** Command lines carry tokens, keys and private paths. Shorten them and mask token-like strings before anything is written, and never put a real token in a fixture or test: build token-shaped values at run time.
 
 ## Glossary
@@ -44,7 +44,7 @@ One meaning per term. Code, docs, UI copy and agents use these words and no syno
 
 ## Dependencies
 
-- The stack is decided: Avalonia, CommunityToolkit.Mvvm, Velopack and CsWin32. Versions live in `Directory.Packages.props`.
+- The stack is decided: Avalonia, CommunityToolkit.Mvvm, Velopack, CsWin32 and Oopsling.Avalonia. Versions live in `Directory.Packages.props`.
 - An agent may add a special-purpose library on its own, such as a parser, when it is NativeAOT-compatible. Give the reason in the commit.
 - A general-purpose helper only after checking that nothing in the project, the .NET base library or CsWin32 already does the job.
 - Never a framework, or anything that adds a process, a WebView or a network call, without asking.

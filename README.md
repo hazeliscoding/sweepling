@@ -80,7 +80,7 @@ You need Windows 10 or 11 on x64; Sweepling is tested on Windows 11, and Arm64 P
 2. Run it. It installs for your user only and needs no administrator rights. While a release is new, Windows may say "Windows protected your PC": check that the publisher is Hazel Granados, then choose **More info** and **Run anyway**.
 3. Sweepling starts in the tray as a straw brush. When the brush shows a count, click it, untick anything you still want, and press **Close**.
 
-Sweepling starts when you sign in and keeps itself up to date; right-click the brush to turn either off. To check a download, compare `(Get-FileHash .\sweepling-setup-win-x64.exe).Hash` with its line in the release's `SHA256SUMS`. To remove it, use **Settings > Apps > Installed apps**: that also removes its login start and settings, and leaves your close log and rules in `%APPDATA%\Sweepling`.
+Sweepling starts when you sign in and keeps itself up to date; right-click the brush to turn either off. If it crashes, it shows you its crash report at the next launch, and the report reaches GitHub only if you file it yourself. To check a download, compare `(Get-FileHash .\sweepling-setup-win-x64.exe).Hash` with its line in the release's `SHA256SUMS`. To remove it, use **Settings > Apps > Installed apps**: that also removes its login start and settings, and leaves your close log, rules and crash reports in `%APPDATA%\Sweepling`.
 
 ## Status
 

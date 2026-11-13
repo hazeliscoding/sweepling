@@ -8,6 +8,7 @@ What it keeps, all on your PC:
 
 - `%APPDATA%\Sweepling\closed.log`, a record of what it closed, with command lines shortened and token-like strings masked
 - `%APPDATA%\Sweepling\rules.json`, if you add rules of your own
+- `%APPDATA%\Sweepling\crashes`, a report for each time Sweepling crashed, with your home folder, user name and token-like strings masked, written by [Oopsling](https://github.com/hazeliscoding/oopsling). A window shows it at the next launch, and it reaches GitHub only if you file it yourself, in your own browser.
 - its update setting under `HKCU\Software\Sweepling`, and its value under your Run key when it starts at login
 
 Its only network call is the update check against this repository's GitHub Releases, which **Update automatically** in the tray menu turns off. There is no telemetry.
