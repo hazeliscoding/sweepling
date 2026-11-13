@@ -29,6 +29,22 @@ public sealed class UpdateGateTests
         Assert.Equal(1, _restarts);
     }
 
+    // The crash report window can be open beside the review window, and a restart would close it unfiled.
+    [Fact]
+    public void An_update_waits_for_every_window_to_close()
+    {
+        var gate = new UpdateGate(() => _restarts++);
+        gate.WindowOpened();
+        gate.WindowOpened();
+        gate.Downloaded();
+
+        gate.WindowClosed();
+        Assert.Equal(0, _restarts);
+
+        gate.WindowClosed();
+        Assert.Equal(1, _restarts);
+    }
+
     [Fact]
     public void Closing_the_window_with_no_update_waiting_restarts_nothing()
     {

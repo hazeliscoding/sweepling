@@ -1,9 +1,12 @@
 namespace Sweepling.Install;
 
-/// <summary>Restarts into a downloaded update only while the review window is closed, so it never ends a review.</summary>
+/// <summary>
+/// Restarts into a downloaded update only while no window is open, so it never ends a review or closes a crash report
+/// before it's filed.
+/// </summary>
 public sealed class UpdateGate(Action restart)
 {
-    private bool _windowOpen;
+    private int _windowsOpen;
     private bool _waiting;
 
     public void Downloaded()
@@ -12,17 +15,17 @@ public sealed class UpdateGate(Action restart)
         RestartIfFree();
     }
 
-    public void WindowOpened() => _windowOpen = true;
+    public void WindowOpened() => _windowsOpen++;
 
     public void WindowClosed()
     {
-        _windowOpen = false;
+        _windowsOpen--;
         RestartIfFree();
     }
 
     private void RestartIfFree()
     {
-        if (_waiting && !_windowOpen)
+        if (_waiting && _windowsOpen == 0)
         {
             _waiting = false;
             restart();
