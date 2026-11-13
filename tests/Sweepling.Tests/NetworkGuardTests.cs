@@ -25,6 +25,14 @@ public sealed class NetworkGuardTests
     public void Sweepling_references_no_networking_assembly() =>
         Assert.Empty(NetworkReferences(typeof(App).Assembly));
 
+    // Oopsling only writes crash reports to disk. The person files one themselves, from their own browser.
+    [Fact]
+    public void Oopsling_references_no_networking_assembly()
+    {
+        Assert.Empty(NetworkReferences(typeof(Oopsling.CrashReports).Assembly));
+        Assert.Empty(NetworkReferences(typeof(Oopsling.Avalonia.CrashReportWindow).Assembly));
+    }
+
     [Fact]
     public void The_guard_finds_a_networking_reference() =>
         Assert.Contains("System.Net.Http", NetworkReferences(typeof(JsonContent).Assembly));
